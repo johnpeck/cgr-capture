@@ -118,7 +118,7 @@ def init_config(configFileName):
     config['Trigger'].comments['level'] = ['The trigger level (Volts)']
     
     # Trigger source
-    config['Trigger']['source'] = 1
+    config['Trigger']['source'] = 3
     config['Trigger'].comments['source'] = [
         ' ',
         'Trigger source settings:',
@@ -277,7 +277,7 @@ def main():
             # Trigger on a voltage present at some input
             tracedata = utils.get_uncal_triggered_data(cgr,trigdict)
         logger.info('Acquiring trace ' + str(capturenum + 1) + ' of ' +
-                    config['Acquire']['averages'])
+                    str(config['Acquire']['averages']))
         if capturenum == 0:
             sumdata = tracedata
         else:
