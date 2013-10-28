@@ -78,6 +78,7 @@ def get_cgr():
     # Add undetectable serial ports here
     portlist.append(('/dev/ttyS0', 'ttyS0', 'n/a'))
     portlist.append(('/dev/ttyS9', 'ttyS9', 'n/a'))
+    portlist.append(('/dev/ttyS3', 'ttyS3', 'n/a'))
 
     for serport in portlist:
         rawstr = ''
