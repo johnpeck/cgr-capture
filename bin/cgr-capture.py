@@ -53,11 +53,11 @@ fh.setFormatter(plain_formatter)
 logger.addHandler(fh)
 
 
+# Now that logging has been set up, bring in the utility functions.
+# These will use the same logger as the root application.
+from cgrlib import utils
 
 
-
-
-import cgrlib
 
 #------------------ Configure plotting with gnuplot -------------------
 
@@ -243,22 +243,22 @@ def plotdata(timedata, voltdata, trigdict):
         
 def main():
     config = load_config(configfile)
-    caldict = cgrlib.load_cal()
-    trigdict = cgrlib.get_trig_dict( int(config['Trigger']['source']), 
+    caldict = utils.load_cal()
+    trigdict = utils.get_trig_dict( int(config['Trigger']['source']), 
                                      float(config['Trigger']['level']), 
                                      int(config['Trigger']['polarity']),
                                      int(config['Trigger']['points'])
     )
-    cgr = cgrlib.get_cgr()
-    gainlist = cgrlib.set_hw_gain(cgr, [int(config['Inputs']['Aprobe']),
+    cgr = utils.get_cgr()
+    gainlist = utils.set_hw_gain(cgr, [int(config['Inputs']['Aprobe']),
                                         int(config['Inputs']['Bprobe'])
                                     ]
     )
     # sys.exit() # For running without cgr
 
-    cgrlib.set_trig_level(cgr, caldict, gainlist, trigdict)
-    cgrlib.set_trig_samples(cgr,trigdict)
-    [ctrl_reg, fsamp_act] = cgrlib.set_ctrl_reg(cgr,
+    utils.set_trig_level(cgr, caldict, gainlist, trigdict)
+    utils.set_trig_samples(cgr,trigdict)
+    [ctrl_reg, fsamp_act] = utils.set_ctrl_reg(cgr,
                                                 float(config['Acquire']['rate']), 
                                                 trigdict)
     if not (fsamp_act == float(config['Acquire']['rate'])):
@@ -272,10 +272,10 @@ def main():
     for capturenum in range(int(config['Acquire']['averages'])):
         if trigdict['trigsrc'] == 3:
             # Internal trigger
-            tracedata = cgrlib.get_uncal_forced_data(cgr,ctrl_reg)
+            tracedata = utils.get_uncal_forced_data(cgr,ctrl_reg)
         elif trigdict['trigsrc'] < 3:
             # Trigger on a voltage present at some input
-            tracedata = cgrlib.get_uncal_triggered_data(cgr,trigdict)
+            tracedata = utils.get_uncal_triggered_data(cgr,trigdict)
         logger.info('Acquiring trace ' + str(capturenum + 1) + ' of ' +
                     config['Acquire']['averages'])
         if capturenum == 0:
@@ -285,8 +285,8 @@ def main():
         avgdata = divide(sumdata,float(capturenum +1))
 
         # Apply calibration
-        voltdata = cgrlib.get_cal_data(caldict,gainlist,[avgdata[0],avgdata[1]])
-        timedata = cgrlib.get_timelist(fsamp_act)
+        voltdata = utils.get_cal_data(caldict,gainlist,[avgdata[0],avgdata[1]])
+        timedata = utils.get_timelist(fsamp_act)
         logger.debug('Plotting average of ' + str(capturenum + 1) + ' traces.')
     plotdata(timedata, voltdata, trigdict)
 

@@ -1,6 +1,6 @@
-# cgrlib.py
+# utils.py
 #
-# Library functions for use with the CGR-101 USB oscilloscope 
+# Utility functions for use with the CGR-101 USB oscilloscope 
 
 import logging  # The python logging module
 import serial   # Provides serial class Serial
@@ -19,7 +19,7 @@ calfile = 'cgrcal.pkl'
 configfile = 'cgr.cfg'
 
 # create logger
-module_logger = logging.getLogger('root.cgrlib')
+module_logger = logging.getLogger('root.utils')
 module_logger.setLevel(logging.DEBUG)
 
 # comports() returns a list of comports available in the system
@@ -53,13 +53,13 @@ def load_cal():
         caldict = {}
         module_logger.warning('Failed to open calibration file...using defaults')
         caldict['chA_1x_offset'] = 0
-        caldict['chA_1x_gain'] = 0.0445
+        caldict['chA_1x_slope'] = 0.0445
         caldict['chA_10x_offset'] = 0
-        caldict['chA_10x_gain'] = 0.445
+        caldict['chA_10x_slope'] = 0.445
         caldict['chB_1x_offset'] = 0
-        caldict['chB_1x_gain'] = 0.0445
+        caldict['chB_1x_slope'] = 0.0445
         caldict['chB_10x_offset'] = 0
-        caldict['chB_10x_gain'] = 0.445
+        caldict['chB_10x_slope'] = 0.445
     return caldict
 
 # get_cgr() 
@@ -346,19 +346,19 @@ def set_trig_level(handle, caldict, gainlist, trigdict):
     if (gainlist[0] == 0 and trigdict['trigsrc'] == 0): 
         # Channel A gain is 1x
         trigcts = (511 - caldict['chA_1x_offset'] - 
-                   float(trigdict['triglev'])/caldict['chA_1x_gain'])
+                   float(trigdict['triglev'])/caldict['chA_1x_slope'])
     elif (gainlist[0] == 1 and trigdict['trigsrc'] == 0): 
         # Channel A gain is 10x
         trigcts = (511 - caldict['chA_10x_offset'] - 
-                   float(trigdict['triglev'])/caldict['chA_10x_gain'])
+                   float(trigdict['triglev'])/caldict['chA_10x_slope'])
     elif (gainlist[1] == 0 and trigdict['trigsrc'] == 1): 
         # Channel B gain is 1x
         trigcts = (511 - caldict['chB_1x_offset'] - 
-                   float(trigdict['triglev'])/caldict['chB_1x_gain'])
+                   float(trigdict['triglev'])/caldict['chB_1x_slope'])
     elif (gainlist[1] == 1 and trigdict['trigsrc'] == 1): 
         # Channel B gain is 10x
         trigcts = (511 - caldict['chB_10x_offset'] - 
-                   float(trigdict['triglev'])/caldict['chB_10x_gain'])
+                   float(trigdict['triglev'])/caldict['chB_10x_slope'])
     else:
         trigcts = 511 # 0V
     trigcts_l = int(trigcts%(2**8))
