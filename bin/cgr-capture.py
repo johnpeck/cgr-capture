@@ -72,7 +72,7 @@ Gnuplot.GnuplotOpts.prefer_fifo_data = 0
 
 
 
-configfile = 'cgr_capture.cfg' # The configuration file
+configfile = 'cgr-capture.cfg' # The configuration file
 cmdterm = '\r\n' # Terminates each command
 
 #------------------------ Configuration file --------------------------
@@ -203,14 +203,14 @@ def init_config(configFileName):
 
 # plotdata()
 #
-# Plot data from one channel.
+# Plot data from both channels.
 def plotdata(timedata, voltdata, trigdict):
     # Set debug=1 to see gnuplot commands
     gplot = Gnuplot.Gnuplot(debug=0)
     gplot('set terminal x11')
-    titlestr = ('Trigger at sample ' +
-                ' ({:0.3f} ms)'.format(1000 * timedata[1]))
-    gplot('set title "' + titlestr + '"')
+    # titlestr = ('Trigger at sample ' +
+    #             ' ({:0.3f} ms)'.format(1000 * timedata[1]))
+    # gplot('set title "' + titlestr + '"')
     gplot('set style data lines')
     gplot('set key bottom left')
     gplot.xlabel('Time (s)')
@@ -226,22 +226,24 @@ def plotdata(timedata, voltdata, trigdict):
         timedata,voltdata[1],title='Channel B')
     gplot.plot(gdata_cha,gdata_chb) # Plot the data
     # Add the trigger crosshair
-    trigtime = timedata[1024-trigdict['trigpts']]
-    gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' + 
-          str(trigtime) + ',graph 1 nohead linetype 0')
-    gplot('set arrow from graph 0,first ' + str(trigdict['triglev']) +
-          ' to graph 1,first ' + str(trigdict['triglev']) + 
-          ' nohead linetype 0')
-    gplot('replot')
+    if (trigdict['trigsrc'] < 3):
+        trigtime = timedata[1024-trigdict['trigpts']]
+        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' + 
+              str(trigtime) + ',graph 1 nohead linetype 0')
+        gplot('set arrow from graph 0,first ' + str(trigdict['triglev']) +
+              ' to graph 1,first ' + str(trigdict['triglev']) + 
+              ' nohead linetype 0')
+        gplot('replot')
     savefilename = ('trig.eps')
     gplot('set terminal postscript eps color')
     gplot("set output '" + savefilename + "'")
     gplot('replot')
     gplot('set terminal x11')
-    raw_input('* Press return to exit...')
+    raw_input('* Press return to dismiss plot and exit...')
 
         
 def main():
+    logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(configfile)
     caldict = utils.load_cal()
     trigdict = utils.get_trig_dict( int(config['Trigger']['source']), 

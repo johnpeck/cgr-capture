@@ -18,6 +18,8 @@ calfile = 'cgrcal.pkl'
 # Configuration file
 configfile = 'cgr.cfg'
 
+utilnum = 42
+
 # create logger
 module_logger = logging.getLogger('root.utils')
 module_logger.setLevel(logging.DEBUG)
@@ -74,11 +76,12 @@ def load_cal():
 # 2. Description in human readable form
 # 3. Sort of hardware ID -- may contain VID:PID of USB-serial adapters.
 def get_cgr():
-    portlist = comports()
+    portset = set(comports()) # Use set to prevent repeats
     # Add undetectable serial ports here
-    portlist.append(('/dev/ttyS0', 'ttyS0', 'n/a'))
-    portlist.append(('/dev/ttyS9', 'ttyS9', 'n/a'))
-    portlist.append(('/dev/ttyS3', 'ttyS3', 'n/a'))
+    portset.add(('/dev/ttyS0', 'ttyS0', 'n/a'))
+    portset.add(('/dev/ttyS9', 'ttyS9', 'n/a'))
+    portset.add(('/dev/ttyS3', 'ttyS3', 'n/a'))
+    portlist = list(portset) # set objects do not support indexing
 
     for serport in portlist:
         rawstr = ''
@@ -99,11 +102,13 @@ def get_cgr():
                 return cgr
             else:
                 module_logger.info('Could not open ' + serport[0])
+                portset.remove(serport)
                 if serport == portlist[-1]: # This is the last port
                     module_logger.error('Did not find any CGR-101 units')
                     sys.exit()
         except serial.serialutil.SerialException:
             module_logger.info('Could not open ' + serport[0])
+            portset.remove(serport)
             if serport == portlist[-1]: # This is the last port
                 module_logger.error('Did not find any CGR-101 units')
                 sys.exit()
