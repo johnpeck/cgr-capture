@@ -52,10 +52,14 @@ logger.addHandler(ch)
 fh.setFormatter(plain_formatter)
 logger.addHandler(fh)
 
+#--------------- Done with logging configuration ----------------------
+
+
 
 # Now that logging has been set up, bring in the utility functions.
 # These will use the same logger as the root application.
 from cgrlib import utils
+
 
 
 
@@ -65,18 +69,30 @@ from cgrlib import utils
 from numpy import * # For gnuplot.py
 import Gnuplot, Gnuplot.funcutils # For gnuplot.py
 
+# Set the gnuplot executable
+Gnuplot.GnuplotOpts.gnuplot_command = 'gnuplot'
+
 # Use this option to turn off fifo if you get warnings like:
 # line 0: warning: Skipping unreadable file "/tmp/tmpakexra.gnuplot/fifo"
 Gnuplot.GnuplotOpts.prefer_fifo_data = 0
 
+# Use temporary files instead of inline data
+Gnuplot.GnuplotOpts.prefer_inline_data = 0
+
+# Set the default terminal
+Gnuplot.GnuplotOpts.default_term = 'x11'
+
+#------------------ Done with gnuplot configuration -------------------
 
 
 
-configfile = 'cgr-capture.cfg' # The configuration file
+
+
 cmdterm = '\r\n' # Terminates each command
 
 #------------------------ Configuration file --------------------------
 from configobj import ConfigObj # For writing and reading config file
+configfile = 'cgr-capture.cfg' # The configuration file name
 
 # load_config(configuration file name)
 #
