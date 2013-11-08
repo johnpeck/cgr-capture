@@ -8,6 +8,17 @@ import os       # For basic file I/O
 import ConfigParser # For reading and writing the configuration file
 import sys # For sys.exit()
 
+#--------------------- Configure argument parsing ---------------------
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-o", "--outfile", help="output filename",
+                    action="store_true")
+args = parser.parse_args()
+if args.outfile:
+   print "Output file specified"
+
+#--------------- Done with configuring argument parsing ---------------
+
 
 
 #------------------------- Configure logging --------------------------
@@ -268,22 +279,27 @@ def main():
                                      int(config['Trigger']['points'])
     )
     cgr = utils.get_cgr()
-    gainlist = utils.set_hw_gain(cgr, [int(config['Inputs']['Aprobe']),
-                                        int(config['Inputs']['Bprobe'])
-                                    ]
+    gainlist = utils.set_hw_gain(
+        cgr, [int(config['Inputs']['Aprobe']),
+              int(config['Inputs']['Bprobe'])
+          ]
     )
     # sys.exit() # For running without cgr
 
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
-    [ctrl_reg, fsamp_act] = utils.set_ctrl_reg(cgr,
-                                                float(config['Acquire']['rate']), 
-                                                trigdict)
+    [ctrl_reg, fsamp_act] = utils.set_ctrl_reg(
+        cgr, float(config['Acquire']['rate']), trigdict
+    )
     if not (fsamp_act == float(config['Acquire']['rate'])):
-        logger.warning('Requested sample frequency ' + 
-                       '{:0.3f} kHz '.format(float(config['Acquire']['rate'])/1000) +
-                       'adjusted to ' + 
-                       '{:0.3f} kHz '.format(float(fsamp_act)/1000))
+        logger.warning(
+            'Requested sample frequency ' + '{:0.3f} kHz '.format(
+                float(config['Acquire']['rate'])/1000
+            ) 
+            + 'adjusted to ' + '{:0.3f} kHz '.format(
+                float(fsamp_act)/1000
+            )
+        )
 
     # Wait for trigger, then return uncalibrated data
     
@@ -303,9 +319,13 @@ def main():
         avgdata = divide(sumdata,float(capturenum +1))
 
         # Apply calibration
-        voltdata = utils.get_cal_data(caldict,gainlist,[avgdata[0],avgdata[1]])
+        voltdata = utils.get_cal_data(
+            caldict,gainlist,[avgdata[0],avgdata[1]]
+        )
         timedata = utils.get_timelist(fsamp_act)
-        logger.debug('Plotting average of ' + str(capturenum + 1) + ' traces.')
+        logger.debug(
+            'Plotting average of ' + str(capturenum + 1) + ' traces.'
+        )
     plotdata(timedata, voltdata, trigdict)
 
 
