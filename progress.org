@@ -1,0 +1,11 @@
+#+CATEGORY: cgrlib
+* cgrlib progress
+*---------------------------- Dated notes -----------------------------
+* <2013-11-17 Sun> Created this document
+*----------------------------- TODO list ------------------------------
+* cgr-cal script
+** TODO Config file should specify which voltage to ask for
+* cgr-capture script
+** TODO One command-line argument should be init file
+   - The default should be cgr-capture.cfg, but it should accept
+     alternates.

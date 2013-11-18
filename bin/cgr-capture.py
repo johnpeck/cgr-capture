@@ -11,11 +11,10 @@ import sys # For sys.exit()
 #--------------------- Configure argument parsing ---------------------
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("-o", "--outfile", help="output filename",
-                    action="store_true")
+parser.add_argument("-o", "--outfile", help="output filename")
 args = parser.parse_args()
 if args.outfile:
-   print "Output file specified"
+   print('Output file specified is ' + args.outfile)
 
 #--------------- Done with configuring argument parsing ---------------
 

@@ -106,12 +106,23 @@ def get_cgr():
                 if serport == portlist[-1]: # This is the last port
                     module_logger.error('Did not find any CGR-101 units')
                     sys.exit()
-        except serial.serialutil.SerialException:
+        # Catch exceptions caused by problems opening a filesystem node as
+        # a serial port, and by problems caused by the node not existing.
+        except (serial.serialutil.SerialException, OSError):
             module_logger.info('Could not open ' + serport[0])
             portset.remove(serport)
             if serport == portlist[-1]: # This is the last port
                 module_logger.error('Did not find any CGR-101 units')
                 sys.exit()
+        # This exception should never get handled.  It's just for debugging.
+        except Exception as ex:
+            template = "An exception of type {0} occured. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            print message
+            sys.exit()
+
+
+
 
 def flush_cgr(handle):
     readstr = 'junk'
