@@ -144,48 +144,7 @@ def init_config(configFileName):
         "The calibration file in Python's pickle format"
         ]
     
-    #------------------------- Trigger section ------------------------
-    config['Trigger'] = {}
-    config['Trigger'].comments = {}
-    config.comments['Trigger'] = [
-        ' ',
-        'Trigger configuration']
-    config['Trigger']['level'] = 1.025
-    # config.inline_comments['Trigger'] = 'Inline comment about trigger section'
-    config['Trigger'].comments['level'] = ['The trigger level (Volts)']
-    
-    # Trigger source
-    config['Trigger']['source'] = 3
-    config['Trigger'].comments['source'] = [
-        ' ',
-        'Trigger source settings:',
-        '0 -- channel A',
-        '1 -- channel B',
-        '2 -- external',
-        '3 -- internal (Triggers generated regardless of any level)'
-    ]
-    
-    # Trigger polarity
-    config['Trigger']['polarity'] = 0
-    config['Trigger'].comments['polarity'] = [
-        ' ',
-        'Trigger polarity settings:',
-        '0 -- Rising edge',
-        '1 -- Falling edge'
-    ]
-
-    # Points to acquire after trigger
-    config['Trigger']['points'] = 512
-    config['Trigger'].comments['points'] = [
-        ' ',
-        'Points to acqure after trigger',
-        'The unit always acquires 1024 points from each channel.  This',
-        'number sets the number of points to acquire after a trigger.',
-        'So a value of 100 would mean that 924 points are acquired before',
-        'the trigger, and 100 are acquired after.',
-        'Range: 0, 1, 2, ... , 1024'
-    ]
-    
+   
     #-------------------------- Inputs section ------------------------
     config['Inputs'] = {}
     config['Inputs'].comments = {}
@@ -193,7 +152,12 @@ def init_config(configFileName):
         ' ',
         'Input configuration.  The unit is limited to measuring +/-25Vpp',
         'at its inputs with the 1x probe setting, and at the end of a 10x',
-        'probe with the 10x probe setting.'
+        'probe with the 10x probe setting.',
+        ' ',
+        'Calibration coefficients will only be measured for the',
+        'configuration specified here -- if you want to calibrate to',
+        'the ends of 10x probes, you have to attach probes and specify',
+        'them below.'
     ]
     # Probe setting
     config['Inputs']['Aprobe'] = 0
@@ -264,16 +228,17 @@ def get_offcal_data(caldict, gainlist, rawdata):
     return [cha_voltdata,chb_voltdata]
 
 
-# get_offsets(handle, ctrl_reg, gainlist, caldict)
+# get_offsets(handle, ctrl_reg, gainlist, caldict, config)
 #
-# Walks you through the calibration of both channel offsets using the
-# current gain settings.
+# Walks you through the calibration of offsets using the current gain
+# settings.
 #
 # Arguments:
 #  handle -- serial object representing the CGR-101
 #  ctrl_reg -- value of the control register
 #  gainlist -- [cha_gain, chb_gain]
 #  caldict -- Dictionary of all calibration values
+#  config -- Configuration dictionary from rc file
 #
 # Calibrated data is calculated with:
 # volts = (511 - (rawdata + offset)) * slopevalue
@@ -282,19 +247,35 @@ def get_offcal_data(caldict, gainlist, rawdata):
 #
 # Returns the calibration factor dictionary with the relevant offset
 # factors filled in.
-def get_offsets(handle, ctrl_reg, gainlist, caldict):
+def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     offset_list = []
-    gainlist = cgrlib.set_hw_gain(handle,gainlist)
-    rawdata = cgrlib.get_uncal_forced_data(handle,ctrl_reg)
+    gainlist = utils.set_hw_gain(handle,gainlist)
+    for capturenum in range(int(config['Acquire']['averages'])):
+        tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
+        logger.info('Acquiring trace ' + str(capturenum + 1) + 
+                           ' of ' + str(config['Acquire']['averages']))
+        if capturenum == 0:
+            sumdata = tracedata
+        else:
+            sumdata = add(sumdata,tracedata)
+        avgdata = divide(sumdata,float(capturenum +1))
     for channel in range(2):
-        offset_list.append(511 - average(rawdata[channel]))
+        offset_list.append(511 - average(avgdata[channel]))
     if gainlist[0] == 0: # Channel A set for 1x gain
+        logger.debug('Channel A offset set to ' + 
+                            str(offset_list[0]) + ' counts.')
         caldict['chA_1x_offset'] = offset_list[0]
     elif gainlist[0] == 1: # Channel A set for 10x gain
+        logger.debug('Channel A offset set to ' + 
+                            str(offset_list[0]) + ' counts.')
         caldict['chA_10x_offset'] = offset_list[0] 
     if gainlist[1] == 0: # Channel B set for 1x gain
+        logger.debug('Channel B offset set to ' + 
+                            str(offset_list[1]) + ' counts.')
         caldict['chB_1x_offset'] = offset_list[1]
     elif gainlist[1] == 1: # Channel B set for 10x gain
+        logger.debug('Channel B offset set to ' + 
+                            str(offset_list[1]) + ' counts.')
         caldict['chB_10x_offset'] = offset_list[1]
     return caldict
 
@@ -376,25 +357,22 @@ def plotdata(timedata, voltdata, trigdict):
 
 
 
-
+# ------------------------- Main procedure ----------------------------
 def main(): 
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
     caldict = utils.load_cal(config['Calibration']['calfile'])
-    sys.exit()
-    trigdict = utils.get_trig_dict( int(config['Trigger']['source']), 
-                                     float(config['Trigger']['level']), 
-                                     int(config['Trigger']['polarity']),
-                                     int(config['Trigger']['points'])
-    )
+    
+    # Trigger is hard coded to internal (auto trigger) for the
+    # calibration code.
+    trigdict = utils.get_trig_dict(3,0,0,0) 
+
     cgr = utils.get_cgr()
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])
           ]
     )
-    # sys.exit() # For running without cgr
-    ctrl_reg = cgrlib.set_ctrl_reg(cgr,fsamp,0,0)
     
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
@@ -413,7 +391,7 @@ def main():
     
     # Start the offset calibration
     raw_input('* Remove all inputs and press return...')
-    caldict = get_offsets(cgr, ctrl_reg, gainlist, caldict)
+    caldict = get_offsets(cgr, ctrl_reg, gainlist, caldict, config)
 
     # Start the slope calibration
     # raw_input('* Connect ' + '{:0.3f}'.format(calvolt) +
@@ -422,12 +400,24 @@ def main():
 
     # Test calibration
     raw_input('* Ready to test calibration...')
-    tracedata = utils.get_uncal_forced_data(cgr,ctrl_reg)
+    for capturenum in range(int(config['Acquire']['averages'])):
+        tracedata = utils.get_uncal_forced_data(cgr,ctrl_reg)
+        logger.info('Acquiring trace ' + str(capturenum + 1) + ' of ' +
+                    str(config['Acquire']['averages']))
+        if capturenum == 0:
+            sumdata = tracedata
+        else:
+            sumdata = add(sumdata,tracedata)
+        avgdata = divide(sumdata,float(capturenum +1))
+
     # Get calibrated volts
-    voltdata = cgrlib.get_cal_data(caldict,gainlist,tracedata)
-    plotdata(voltdata)
+    voltdata = utils.get_cal_data(
+       caldict,gainlist,[avgdata[0],avgdata[1]]
+        )
+    timedata = utils.get_timelist(fsamp_act)
+    plotdata(timedata, voltdata, trigdict)
     # Write the calibration data
-    utils.write_cal(caldict)
+    utils.write_cal(config['Calibration']['calfile'],caldict)
 
 
 # Execute main() from command line

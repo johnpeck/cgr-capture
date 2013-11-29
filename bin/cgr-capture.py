@@ -285,6 +285,9 @@ def plotdata(timedata, voltdata, trigdict):
     raw_input('* Press return to dismiss plot and exit...')
 
         
+
+
+# ------------------------- Main procedure ----------------------------
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)

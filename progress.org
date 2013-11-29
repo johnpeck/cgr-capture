@@ -4,10 +4,14 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgr-cal script
+** TODO There should be a file to keep last port
+   - Should have the last port connected to.  This could be something
+     like cgr-session.pkl.
+** TODO Custom serial port list should be added to config
 ** DONE cal file should be set in config file
    - Right now it's specified in the utils.py file.  Its name is cgrcal.pkl.
 ** DONE utils.load_cal() should take a filename
-** TODO trigdict needs to be set manually for calibration
+** DONE trigdict needs to be set manually for calibration
    - Trigger source needs to be manual, and points needs to be set to
      whatever -- 500.  This should be pulled out of the configuration
      file.
@@ -17,6 +21,10 @@
      file.  
 ** TODO Config file should specify which voltage to ask for
 * cgr-capture script
+** TODO There should be a file to keep last port
+   - Should have the last port connected to.  This could be something
+     like cgr-session.pkl.
+** TODO Custom serial port list should be added to the config
 ** DONE Cal file should be set in the config file
 ** DONE One command-line argument should be init file
    - The default should be cgr-capture.cfg, but it should accept

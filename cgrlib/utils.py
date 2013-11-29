@@ -9,6 +9,7 @@ import binascii # For hex string conversion
 import pickle # For writing and reading calibration data
 import sys # For sys.exit()
 import collections # For rotatable lists
+import shutil # For copying files
 
 import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
@@ -27,16 +28,37 @@ from serial.tools.list_ports import comports
 cmdterm = '\r\n' # Terminates each command
 
 
-# write_cal(offlist)
+# write_cal(calfile, caldict)
 #
-# Writes the unit's calibration constants.  The constants are
-# currently just offsets, ordered as:
-# [ Channel A offset with 1x gain, Channel A offset with 10x gain,
-#   Channel B offset with 1x gain, Channel B offset with 10x gain ]
-def write_cal(caldict):
-    fout = open(calfile,'w')
-    pickle.dump(caldict,fout)
-    fout.close()
+# Writes the unit's calibration constants.  See load_cal() for a
+# list of dictionary entries.
+#
+# If the specified calfile exists, it will be saved as calfile_old and
+# a new calfile will be written.
+def write_cal(calfile, caldict):
+    try:
+        with open(calfile):
+            # If this succeeds, the file already exists.  Copy the
+            # existing file to an old version.
+            calfile_old = (calfile.split('.')[0] + '_old.' + 
+                           calfile.split('.')[1])
+            module_logger.warning(
+                'Calibration file ' + calfile + 
+                ' found...saving it to ' + calfile_old
+            )
+            shutil.copyfile(calfile,(
+                calfile.split('.')[0] + '_old.' + calfile.split('.')[1]
+            ))
+            module_logger.info('Writing calibration to ' + calfile)
+            with open(calfile,'w') as fout:
+                pickle.dump(caldict,fout)
+                fout.close()
+    except IOError:
+        module_logger.info('Writing calibration to ' + calfile)
+        with open(calfile,'w') as fout:
+            pickle.dump(caldict,fout)
+            fout.close()
+        
 
 # load_cal(calibration file)
 #
