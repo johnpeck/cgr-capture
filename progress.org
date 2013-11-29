@@ -1,11 +1,24 @@
 #+CATEGORY: cgrlib
 * cgrlib progress
-*---------------------------- Dated notes -----------------------------
+* ---------------------------- Dated notes -----------------------------
 * <2013-11-17 Sun> Created this document
-*----------------------------- TODO list ------------------------------
+* ----------------------------- TODO list ------------------------------
 * cgr-cal script
+** DONE cal file should be set in config file
+   - Right now it's specified in the utils.py file.  Its name is cgrcal.pkl.
+** DONE utils.load_cal() should take a filename
+** TODO trigdict needs to be set manually for calibration
+   - Trigger source needs to be manual, and points needs to be set to
+     whatever -- 500.  This should be pulled out of the configuration
+     file.
+** TODO get_offsets function should just get offsets specified by cfg
+   - Right now the function runs through both gain settings.  I think
+     a better way is to only use the gain setting set in the config
+     file.  
 ** TODO Config file should specify which voltage to ask for
 * cgr-capture script
-** TODO One command-line argument should be init file
+** DONE Cal file should be set in the config file
+** DONE One command-line argument should be init file
    - The default should be cgr-capture.cfg, but it should accept
      alternates.
+** DONE Check to see that averaging works

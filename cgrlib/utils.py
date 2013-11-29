@@ -13,10 +13,6 @@ import collections # For rotatable lists
 import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
 
-# File used to hold the calibration constant dictionary
-calfile = 'cgrcal.pkl'
-# Configuration file
-configfile = 'cgr.cfg'
 
 utilnum = 42
 
@@ -42,18 +38,23 @@ def write_cal(caldict):
     pickle.dump(caldict,fout)
     fout.close()
 
-# load_cal()
+# load_cal(calibration file)
 #
 # Loads and returns the calibration constants.  Loads some defaults
 # into the calibration dictionary if a calibration file isn't found.
-def load_cal():
+# 
+# The calibration file is in Python's pickle format
+def load_cal(calfile):
     try:
+        module_logger.info('Loading calibration file ' + calfile)
         fin = open(calfile,'rb')
         caldict = pickle.load(fin)
         fin.close()
     except IOError:
         caldict = {}
-        module_logger.warning('Failed to open calibration file...using defaults')
+        module_logger.warning(
+            'Failed to open calibration file...using defaults'
+        )
         caldict['chA_1x_offset'] = 0
         caldict['chA_1x_slope'] = 0.0445
         caldict['chA_10x_offset'] = 0
