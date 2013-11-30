@@ -4,6 +4,14 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgr-cal script
+** TODO Calibration dates need to be added to caldict
+   - caldict members _caldate should be added for each calibration
+     coefficient.  For example, since there's a chA_1x_offset member,
+     there should be a chA_1x_offset_caldate member.  If the member
+     has never been calibrated, the caldate should be 'none'.  When
+     the calibration coefficient is used, there should be a warning
+     that the coefficient has never been updated from its default
+     value.
 ** TODO There should be a file to keep last port
    - Should have the last port connected to.  This could be something
      like cgr-session.pkl.
@@ -15,7 +23,7 @@
    - Trigger source needs to be manual, and points needs to be set to
      whatever -- 500.  This should be pulled out of the configuration
      file.
-** TODO get_offsets function should just get offsets specified by cfg
+** DONE get_offsets function should just get offsets specified by cfg
    - Right now the function runs through both gain settings.  I think
      a better way is to only use the gain setting set in the config
      file.  
