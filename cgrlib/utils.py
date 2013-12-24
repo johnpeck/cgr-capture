@@ -27,6 +27,25 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
+# Specify a default calibration dictionary
+caldict_default = {'chA_1x_offset': 0,
+                   'chA_1x_offset_caldate': 'none',
+                   'chA_1x_slope': 0.0445,
+                   'chA_1x_slope_caldate': 'none',
+                   'chA_10x_offset': 0,
+                   'chA_10x_offset_caldate': 'none',
+                   'chA_10x_slope': 0.0445,
+                   'chA_10x_slope_caldate': 'none',
+                   'chB_1x_offset': 0,
+                   'chB_1x_offset_caldate': 'none',
+                   'chB_1x_slope': 0.0445,
+                   'chB_1x_slope_caldate': 'none',
+                   'chB_10x_offset': 0,
+                   'chB_10x_offset_caldate': 'none',
+                   'chB_10x_slope': 0.0445,
+                   'chB_10x_slope_caldate': 'none'
+}
+
 
 # write_cal(calfile, caldict)
 #
@@ -42,9 +61,9 @@ def write_cal(calfile, caldict):
             # existing file to an old version.
             calfile_old = (calfile.split('.')[0] + '_old.' + 
                            calfile.split('.')[1])
-            module_logger.warning(
-                'Calibration file ' + calfile + 
-                ' found...saving it to ' + calfile_old
+            module_logger.info(
+                'Backing up calibration file ' + calfile + 
+                ' to ' + calfile_old
             )
             shutil.copyfile(calfile,(
                 calfile.split('.')[0] + '_old.' + calfile.split('.')[1]
@@ -64,6 +83,14 @@ def write_cal(calfile, caldict):
 #
 # Loads and returns the calibration constants.  Loads some defaults
 # into the calibration dictionary if a calibration file isn't found.
+#
+# Inputs:
+#     calfile: Filename for pickled calibration constants.  This
+#              filename should be specified in the script's
+#              configuration file.
+#
+# Returns:
+#     caldict: A dictionary of (calibration factor names) : values
 # 
 # The calibration file is in Python's pickle format
 def load_cal(calfile):
@@ -71,20 +98,19 @@ def load_cal(calfile):
         module_logger.info('Loading calibration file ' + calfile)
         fin = open(calfile,'rb')
         caldict = pickle.load(fin)
+        # Make sure all needed calibration factors are in the dictionary
+        for key in caldict_default:
+            if not key in caldict:
+                module_logger.info('Adding calibration value ' +
+                                   str(key) + ' to dictionary.'
+                )
+                caldict[key] = caldict_default[key]
         fin.close()
     except IOError:
-        caldict = {}
         module_logger.warning(
             'Failed to open calibration file...using defaults'
         )
-        caldict['chA_1x_offset'] = 0
-        caldict['chA_1x_slope'] = 0.0445
-        caldict['chA_10x_offset'] = 0
-        caldict['chA_10x_slope'] = 0.445
-        caldict['chB_1x_offset'] = 0
-        caldict['chB_1x_slope'] = 0.0445
-        caldict['chB_10x_offset'] = 0
-        caldict['chB_10x_slope'] = 0.445
+        caldict = caldict_default
     return caldict
 
 # get_cgr() 

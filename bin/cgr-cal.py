@@ -3,6 +3,7 @@
 # Automates slope and offset calibration
 
 import time     # For making pauses
+from datetime import datetime # For assigning dates to calibration factors
 import os       # For basic file I/O
 import ConfigParser # For reading and writing the configuration file
 import sys # For sys.exit()
@@ -233,20 +234,21 @@ def get_offcal_data(caldict, gainlist, rawdata):
 # Walks you through the calibration of offsets using the current gain
 # settings.
 #
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  ctrl_reg -- value of the control register
-#  gainlist -- [cha_gain, chb_gain]
-#  caldict -- Dictionary of all calibration values
-#  config -- Configuration dictionary from rc file
+# Inputs:
+#     handle -- serial object representing the CGR-101
+#     ctrl_reg -- value of the control register
+#     gainlist -- [cha_gain, chb_gain]
+#     caldict -- Dictionary of all calibration values
+#     config -- Configuration dictionary from rc file
 #
 # Calibrated data is calculated with:
 # volts = (511 - (rawdata + offset)) * slopevalue
 # ...so offsets are calculated with:
 # offset = 511 - rawdata
 #
-# Returns the calibration factor dictionary with the relevant offset
-# factors filled in.
+# Returns: 
+#     caldict: The calibration factor dictionary with the relevant 
+#     offset factors filled in.
 def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     offset_list = []
     gainlist = utils.set_hw_gain(handle,gainlist)
@@ -263,20 +265,24 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
         offset_list.append(511 - average(avgdata[channel]))
     if gainlist[0] == 0: # Channel A set for 1x gain
         logger.debug('Channel A offset set to ' + 
-                            str(offset_list[0]) + ' counts.')
+                     str(offset_list[0]) + ' counts.')
         caldict['chA_1x_offset'] = offset_list[0]
+        caldict['chA_1x_offset_caldate'] = datetime.now()
     elif gainlist[0] == 1: # Channel A set for 10x gain
         logger.debug('Channel A offset set to ' + 
                             str(offset_list[0]) + ' counts.')
         caldict['chA_10x_offset'] = offset_list[0] 
+        caldict['chA_10x_offset_caldate'] = datetime.now()
     if gainlist[1] == 0: # Channel B set for 1x gain
         logger.debug('Channel B offset set to ' + 
                             str(offset_list[1]) + ' counts.')
         caldict['chB_1x_offset'] = offset_list[1]
+        caldict['chB_1x_offset_caldate'] = datetime.now()
     elif gainlist[1] == 1: # Channel B set for 10x gain
         logger.debug('Channel B offset set to ' + 
                             str(offset_list[1]) + ' counts.')
         caldict['chB_10x_offset'] = offset_list[1]
+        caldict['chB_10x_offset_caldate'] = datetime.now()
     return caldict
 
 
@@ -290,7 +296,7 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
 # Calibrated data is calculated with:
 # volts = (511 - (rawdata + offset)) * slopevalue
 # ...so slopes are calculated with:
-# slope = calvolt/(offset corrected data)
+# slopevalue = calvolt/(offset corrected data)
 #
 # Arguments:
 #  handle -- serial object representing the CGR-101
