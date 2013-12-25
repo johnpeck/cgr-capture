@@ -340,7 +340,7 @@ def main():
     # Apply calibration
     voltdata = utils.get_cal_data(
        caldict,gainlist,[avgdata[0],avgdata[1]]
-        )
+    )
     timedata = utils.get_timelist(fsamp_act)
     logger.debug(
        'Plotting average of ' + str(capturenum + 1) + ' traces.'

@@ -33,6 +33,8 @@
    - If the dates are 'none' or more than a year apart, a warning
      should be raised.  See the caldict_default dictionary in utils.py
      for a list of all calibration factors and their associated dates.
+   - I started doing this with get_cal_data() from utils.py.  This
+     needs to be extended to the remaining calibration factors.
 ** TODO There should be a file to keep last port
    - Should have the last port connected to.  This could be something
      like cgr-session.pkl.

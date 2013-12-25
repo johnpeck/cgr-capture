@@ -5,6 +5,7 @@
 import logging  # The python logging module
 import serial   # Provides serial class Serial
 import time     # For making pauses
+from datetime import datetime # For finding calibration time differences
 import binascii # For hex string conversion
 import pickle # For writing and reading calibration data
 import sys # For sys.exit()
@@ -27,7 +28,9 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
-# Specify a default calibration dictionary
+# Specify a default calibration dictionary.  This dictionary
+# definition is also where all the calibration factors are defined.
+# If you want to add another factor, this is the place to do it.
 caldict_default = {'chA_1x_offset': 0,
                    'chA_1x_offset_caldate': 'none',
                    'chA_1x_slope': 0.0445,
@@ -49,11 +52,20 @@ caldict_default = {'chA_1x_offset': 0,
 
 # write_cal(calfile, caldict)
 #
-# Writes the unit's calibration constants.  See load_cal() for a
-# list of dictionary entries.
+# Writes the unit's calibration constants.  See the caldict_default
+# definition for a list of dictionary entries.  If the specified
+# calfile exists, it will be saved as calfile_old and a new calfile
+# will be written.
 #
-# If the specified calfile exists, it will be saved as calfile_old and
-# a new calfile will be written.
+# Inputs:
+#     calfile: Filename for pickled calibration constants.  This
+#              filename should be specified in the application's
+#              configuration file.
+#
+#     caldict: A dictionary of (calibration factor names) : values
+#
+# Returns:
+#     None
 def write_cal(calfile, caldict):
     try:
         with open(calfile):
@@ -86,13 +98,12 @@ def write_cal(calfile, caldict):
 #
 # Inputs:
 #     calfile: Filename for pickled calibration constants.  This
-#              filename should be specified in the script's
+#              filename should be specified in the application's
 #              configuration file.
 #
 # Returns:
 #     caldict: A dictionary of (calibration factor names) : values
 # 
-# The calibration file is in Python's pickle format
 def load_cal(calfile):
     try:
         module_logger.info('Loading calibration file ' + calfile)
@@ -115,16 +126,22 @@ def load_cal(calfile):
 
 # get_cgr() 
 #
-# Returns an instrument variable for the cgr scope, or an error
+# Returns a serial object for the cgr scope, or an error
 # message if the connection fails.
 #
-# The comports() function returns an iterable that yields tuples of
-# three strings:
+# Inputs:
+#     None
 #
-# 1. Port name as it can be passed to serial.Serial
-# 2. Description in human readable form
-# 3. Sort of hardware ID -- may contain VID:PID of USB-serial adapters.
+# Returns: 
+#     cgr: Serial communication object corresponding to the CGR-101
+#          USB oscilloscope.
 def get_cgr():
+    # The comports() function returns an iterable that yields tuples of
+    # three strings:
+    #
+    # 1. Port name as it can be passed to serial.Serial
+    # 2. Description in human readable form
+    # 3. Sort of hardware ID -- may contain VID:PID of USB-serial adapters.
     portset = set(comports()) # Use set to prevent repeats
     # Add undetectable serial ports here
     portset.add(('/dev/ttyS0', 'ttyS0', 'n/a'))
@@ -552,13 +569,27 @@ def get_uncal_forced_data(handle,ctrl_reg):
 
 # get_cal_data(caldict,gainlist,rawdata)
 #
-# Convert raw data points to voltages.  Return the list of voltages.
+# Convert raw data points to voltages.  Return the list of
+# voltages. The raw data list contains samples from both channels.
 #
-# The raw data list contains samples from both channels.
+# Inputs:
+#     caldict: A dictionary of (calibration factor name) : values
+#     gainlist: List of gain settings -- [chA_gain, chB_gain]
+#     rawdata: 2D list of data downloaded from the CGR-101.
+#              [Channel A data, Channel B data]
+#
+# Returns:
+#     2D list of calibrated data in Volt units:  
+#     [Channel A data, Channel B data]
+#              
 def get_cal_data(caldict,gainlist,rawdata):
     if gainlist[0] == 0:
         # Channel A has 1x gain
         chA_slope = caldict['chA_1x_slope']
+        if ((caldict['chA_1x_offset_caldate'] == 'none') or
+            ((caldict['chA_1x_offset_caldate'] - 
+              datetime.now()).days >= 365)):
+            module_logger.warning('Channel A 1x offset is out of date')
         chA_offset = caldict['chA_1x_offset']
     elif gainlist[0] == 1:
         # Channel A has 10x gain
