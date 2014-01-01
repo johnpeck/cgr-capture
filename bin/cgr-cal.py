@@ -144,6 +144,14 @@ def init_config(configFileName):
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
         ]
+    config['Calibration']['voltage'] = 1
+    config['Calibration'].comments['voltage'] = [
+       ' ',
+       'Calibration voltage',
+       'Voltage offsets will be calibrated out using a 0V (open) input',
+       'but we need a non-zero voltage to calibrate slope.'
+       ]
+
     
    
     #-------------------------- Inputs section ------------------------

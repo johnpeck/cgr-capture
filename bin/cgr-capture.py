@@ -151,6 +151,7 @@ def init_config(configFileName):
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
         ]
+
     
     #------------------------- Trigger section ------------------------
     config['Trigger'] = {}

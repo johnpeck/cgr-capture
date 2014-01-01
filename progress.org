@@ -4,6 +4,7 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgr-cal script
+** TODO Config file should specify which voltage to ask for
 ** DONE Calibration dates need to be added to caldict
    - caldict members _caldate should be added for each calibration
      coefficient.  For example, since there's a chA_1x_offset member,
@@ -27,9 +28,8 @@
    - Right now the function runs through both gain settings.  I think
      a better way is to only use the gain setting set in the config
      file.  
-** TODO Config file should specify which voltage to ask for
 * cgr-capture script
-** TODO Calibration factor dates must be checked when used
+** DONE Calibration factor dates must be checked when used
    - If the dates are 'none' or more than a year apart, a warning
      should be raised.  See the caldict_default dictionary in utils.py
      for a list of all calibration factors and their associated dates.
