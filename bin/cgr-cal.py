@@ -123,12 +123,16 @@ def load_config(configFileName):
         return config
 
 
-# init_config(configuration file name)
-#
-# Initialize the configuration file.  The file name should be
-# specified by the user in the application code.  This function is
-# unique to the application, so it's not really a library function.
+
 def init_config(configFileName):
+    """ Initialize the configuration file.
+
+    The file name should be specified by the user in the application
+    code.  This function is unique to the application, so it's not
+    really a library function.
+
+    """
+
     config = ConfigObj()
     config.filename = configFileName
     config.initial_comment = [
@@ -211,13 +215,9 @@ def init_config(configFileName):
     return config
 
 
-
-
-
-# get_offcal_data(caldict,gainlist,rawdata)
-#
-# Correct raw data for offset only.
 def get_offcal_data(caldict, gainlist, rawdata):
+    """ Remove offsets from raw data.
+    """
     if gainlist[0] == 0: # Channel A has 1x gain
         chA_offset = caldict['chA_1x_offset']
     elif gainlist[0] == 1: # Channel A has 10x gain
@@ -237,27 +237,25 @@ def get_offcal_data(caldict, gainlist, rawdata):
     return [cha_voltdata,chb_voltdata]
 
 
-# get_offsets(handle, ctrl_reg, gainlist, caldict, config)
-#
-# Walks you through the calibration of offsets using the current gain
-# settings.
-#
-# Inputs:
-#     handle -- serial object representing the CGR-101
-#     ctrl_reg -- value of the control register
-#     gainlist -- [cha_gain, chb_gain]
-#     caldict -- Dictionary of all calibration values
-#     config -- Configuration dictionary from rc file
-#
-# Calibrated data is calculated with:
-# volts = (511 - (rawdata + offset)) * slopevalue
-# ...so offsets are calculated with:
-# offset = 511 - rawdata
-#
-# Returns: 
-#     caldict: The calibration factor dictionary with the relevant 
-#     offset factors filled in.
 def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
+    """ Measure and record voltage offset coefficients.
+    
+    Inputs:
+        handle -- serial object representing the CGR-101
+        ctrl_reg -- value of the control register
+        gainlist -- [cha_gain, chb_gain]
+        caldict -- Dictionary of all calibration values
+        config -- Configuration dictionary from rc file
+
+    Calibrated data is calculated with:
+        volts = (511 - (rawdata + offset)) * slopevalue
+    ...so offsets are calculated with:
+        offset = 511 - rawdata
+
+    Returns: 
+        caldict: The calibration factor dictionary with the relevant 
+                 offset factors filled in.
+    """
     offset_list = []
     gainlist = utils.set_hw_gain(handle,gainlist)
     for capturenum in range(int(config['Acquire']['averages'])):
@@ -278,55 +276,77 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
         caldict['chA_1x_offset_caldate'] = datetime.now()
     elif gainlist[0] == 1: # Channel A set for 10x gain
         logger.debug('Channel A offset set to ' + 
-                            str(offset_list[0]) + ' counts.')
+                     str(offset_list[0]) + ' counts.')
         caldict['chA_10x_offset'] = offset_list[0] 
         caldict['chA_10x_offset_caldate'] = datetime.now()
     if gainlist[1] == 0: # Channel B set for 1x gain
         logger.debug('Channel B offset set to ' + 
-                            str(offset_list[1]) + ' counts.')
+                     str(offset_list[1]) + ' counts.')
         caldict['chB_1x_offset'] = offset_list[1]
         caldict['chB_1x_offset_caldate'] = datetime.now()
     elif gainlist[1] == 1: # Channel B set for 10x gain
         logger.debug('Channel B offset set to ' + 
-                            str(offset_list[1]) + ' counts.')
+                     str(offset_list[1]) + ' counts.')
         caldict['chB_10x_offset'] = offset_list[1]
         caldict['chB_10x_offset_caldate'] = datetime.now()
     return caldict
 
 
-# get_slopes(handle, ctrl_reg, gainlist, caldict, calvolt)
-#
-# Fills in slope values for whatever gain is set. 
-#
-# To calibrate using the 10x gain settings, you should really be using
-# a 10x scope probe.
-#
-# Calibrated data is calculated with:
-# volts = (511 - (rawdata + offset)) * slopevalue
-# ...so slopes are calculated with:
-# slopevalue = calvolt/(offset corrected data)
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  ctrl_reg -- value of the control register
-#  gainlist -- [cha_gain, chb_gain]
-#  caldict -- Dictionary of all calibration values
-#  calvolt -- The voltage used during slope calibration
-def get_slopes(handle, ctrl_reg, gainlist, caldict, calvolt):
+
+def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
+    """Measure and record voltage slope coefficients.
+    
+    This doesn't measure all slope coeffients -- just those for the
+    gain settings being used.
+
+    Calibrated data is calculated with:
+        volts = (511 - (rawdata + offset)) * slopevalue
+    ...so slopes are calculated with:
+        slopevalue = calvolt/(offset corrected data)
+
+    Arguments:
+      handle -- serial object representing the CGR-101
+      ctrl_reg -- value of the control register
+      gainlist -- [cha_gain, chb_gain]
+      caldict -- Dictionary of all calibration values
+      config -- Configuration dictionary from rc file
+
+    """
+    calvolt = float(config['Calibration']['voltage'])
     slope_list = []
-    gainlist = cgrlib.set_hw_gain(handle,gainlist)
-    rawdata = cgrlib.get_uncal_forced_data(handle,ctrl_reg)
-    offcal_data = get_offcal_data(caldict,gainlist,rawdata)
-    for channel in range(2):
-        slope_list.append(calvolt/(average(offcal_data[channel])))
-    if gainlist[0] == 0: # Channel A set for 1x gain
-        caldict['chA_1x_slope'] = slope_list[0]
-    elif gainlist[0] == 1: # Channel A set for 10x gain
-        caldict['chA_10x_slope'] = slope_list[0] 
-    if gainlist[1] == 0: # Channel B set for 1x gain
-        caldict['chB_1x_slope'] = slope_list[1]
-    elif gainlist[1] == 1: # Channel B set for 10x gain
-        caldict['chB_10x_slope'] = slope_list[1]
+    gainlist = utils.set_hw_gain(handle,gainlist)
+    try:
+         raw_input(
+             '* Connect ' + '{:0.3f}'.format(calvolt) +
+             'V calibration voltage and press return (Control-C to skip)'
+         )
+         rawdata = utils.get_uncal_forced_data(handle,ctrl_reg)
+         offcal_data = get_offcal_data(caldict,gainlist,rawdata)
+         for channel in range(2):
+             slope_list.append(calvolt/(average(offcal_data[channel])))
+         if gainlist[0] == 0: # Channel A set for 1x gain
+             logger.debug('Channel A 1x slope set to ' +
+                          str(slope_list[0]) + ' Volts per count.')
+             caldict['chA_1x_slope'] = slope_list[0]
+             caldict['chA_1x_slope_caldate'] = datetime.now()
+         elif gainlist[0] == 1: # Channel A set for 10x gain
+             logger.debug('Channel A 10x slope set to ' +
+                          str(slope_list[0]) + ' Volts per count.')
+             caldict['chA_10x_slope'] = slope_list[0] 
+             caldict['chA_10x_slope_caldate'] = datetime.now()
+         if gainlist[1] == 0: # Channel B set for 1x gain
+             logger.debug('Channel B 1x slope set to ' +
+                          str(slope_list[1]) + ' Volts per count.')
+             caldict['chB_1x_slope'] = slope_list[1]
+             caldict['chB_1x_slope_caldate'] = datetime.now()
+         elif gainlist[1] == 1: # Channel B set for 10x gain
+             logger.debug('Channel B 10x slope set to ' +
+                          str(slope_list[1]) + ' Volts per count.')
+             caldict['chB_10x_slope'] = slope_list[1]
+             caldict['chB_10x_slope_caldate'] = datetime.now()
+    except KeyboardInterrupt:
+         print(' ')
+         logger.info('Slope calibration skipped')
     return caldict
 
 # plotdata()
@@ -408,9 +428,7 @@ def main():
     caldict = get_offsets(cgr, ctrl_reg, gainlist, caldict, config)
 
     # Start the slope calibration
-    # raw_input('* Connect ' + '{:0.3f}'.format(calvolt) +
-    #           'V calibration voltage and press return...')
-    # caldict = get_slopes(cgr, ctrl_reg, gainlist, caldict, calvolt)
+    caldict = get_slopes(cgr, ctrl_reg, gainlist, caldict, config)
 
     # Test calibration
     raw_input('* Ready to test calibration...')

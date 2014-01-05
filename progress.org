@@ -4,7 +4,11 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgr-cal script
-** TODO Config file should specify which voltage to ask for
+** TODO Add checks for slope and offset values
+   - Offset counts should be within 10 counts of zero, and offsets
+     should be within 10% of 45mV / count.  Fail the calibration and
+     don't write any calibration factors if this happens.
+** DONE Config file should specify which voltage to ask for
 ** DONE Calibration dates need to be added to caldict
    - caldict members _caldate should be added for each calibration
      coefficient.  For example, since there's a chA_1x_offset member,
