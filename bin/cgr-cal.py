@@ -17,7 +17,7 @@ parser.add_argument("-r", "--rcfile" , default="cgr-cal.cfg",
                     help="Runtime configuration file")
 args = parser.parse_args()
 if args.outfile:
-   print('Output file specified is ' + args.outfile)
+    print('Output file specified is ' + args.outfile)
 
 # --------------- Done with configuring argument parsing --------------
 
@@ -108,12 +108,12 @@ configfile = args.rcfile # The configuration file name
 # Open the configuration file (if it exists) and return the
 # configuration object.  If the file doesn't exist, call the init
 # function to create it.
-# 
+#
 # This function could probably go in the library, since there's
 # nothing unique about it.
 def load_config(configFileName):
     try:
-        logger.info('Reading configuration file ' + configFileName)   
+        logger.info('Reading configuration file ' + configFileName)
         config = ConfigObj(configFileName,file_error=True)
         return config
     except IOError:
@@ -156,8 +156,8 @@ def init_config(configFileName):
        'but we need a non-zero voltage to calibrate slope.'
        ]
 
-    
-   
+
+
     #-------------------------- Inputs section ------------------------
     config['Inputs'] = {}
     config['Inputs'].comments = {}
@@ -207,16 +207,20 @@ def init_config(configFileName):
         'Number of acquisitions to average'
     ]
 
-    
+
     # Writing our configuration file
-    logger.debug('Initializing configuration file ' + 
+    logger.debug('Initializing configuration file ' +
                  configFileName)
     config.write()
     return config
 
 
 def get_offcal_data(caldict, gainlist, rawdata):
-    """ Remove offsets from raw data.
+    """Remove offsets from raw data.
+
+    This is a subset of what get_cal_data() from utils.py does.  This
+    function only removes offset -- leaving slope at unity.
+
     """
     if gainlist[0] == 0: # Channel A has 1x gain
         chA_offset = caldict['chA_1x_offset']
@@ -239,7 +243,7 @@ def get_offcal_data(caldict, gainlist, rawdata):
 
 def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     """ Measure and record voltage offset coefficients.
-    
+
     Inputs:
         handle -- serial object representing the CGR-101
         ctrl_reg -- value of the control register
@@ -252,50 +256,57 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     ...so offsets are calculated with:
         offset = 511 - rawdata
 
-    Returns: 
-        caldict: The calibration factor dictionary with the relevant 
+    Returns:
+        caldict: The calibration factor dictionary with the relevant
                  offset factors filled in.
     """
     offset_list = []
     gainlist = utils.set_hw_gain(handle,gainlist)
-    for capturenum in range(int(config['Acquire']['averages'])):
-        tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
-        logger.info('Acquiring trace ' + str(capturenum + 1) + 
-                           ' of ' + str(config['Acquire']['averages']))
-        if capturenum == 0:
-            sumdata = tracedata
-        else:
-            sumdata = add(sumdata,tracedata)
-        avgdata = divide(sumdata,float(capturenum +1))
-    for channel in range(2):
-        offset_list.append(511 - average(avgdata[channel]))
-    if gainlist[0] == 0: # Channel A set for 1x gain
-        logger.debug('Channel A offset set to ' + 
-                     str(offset_list[0]) + ' counts.')
-        caldict['chA_1x_offset'] = offset_list[0]
-        caldict['chA_1x_offset_caldate'] = datetime.now()
-    elif gainlist[0] == 1: # Channel A set for 10x gain
-        logger.debug('Channel A offset set to ' + 
-                     str(offset_list[0]) + ' counts.')
-        caldict['chA_10x_offset'] = offset_list[0] 
-        caldict['chA_10x_offset_caldate'] = datetime.now()
-    if gainlist[1] == 0: # Channel B set for 1x gain
-        logger.debug('Channel B offset set to ' + 
-                     str(offset_list[1]) + ' counts.')
-        caldict['chB_1x_offset'] = offset_list[1]
-        caldict['chB_1x_offset_caldate'] = datetime.now()
-    elif gainlist[1] == 1: # Channel B set for 10x gain
-        logger.debug('Channel B offset set to ' + 
-                     str(offset_list[1]) + ' counts.')
-        caldict['chB_10x_offset'] = offset_list[1]
-        caldict['chB_10x_offset_caldate'] = datetime.now()
+    try:
+        raw_input(
+           '* Disconnect all inputs and press return (Control-C to skip)'
+        )
+        for capturenum in range(int(config['Acquire']['averages'])):
+            tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
+            logger.info('Acquiring trace ' + str(capturenum + 1) +
+                        ' of ' + str(config['Acquire']['averages']))
+            if capturenum == 0:
+                sumdata = tracedata
+            else:
+                sumdata = add(sumdata,tracedata)
+            avgdata = divide(sumdata,float(capturenum +1))
+        for channel in range(2):
+            offset_list.append(511 - average(avgdata[channel]))
+        if gainlist[0] == 0: # Channel A set for 1x gain
+            logger.debug('Channel A offset set to ' +
+                         str(offset_list[0]) + ' counts.')
+            caldict['chA_1x_offset'] = offset_list[0]
+            caldict['chA_1x_offset_caldate'] = datetime.now()
+        elif gainlist[0] == 1: # Channel A set for 10x gain
+            logger.debug('Channel A offset set to ' +
+                         str(offset_list[0]) + ' counts.')
+            caldict['chA_10x_offset'] = offset_list[0]
+            caldict['chA_10x_offset_caldate'] = datetime.now()
+        if gainlist[1] == 0: # Channel B set for 1x gain
+            logger.debug('Channel B offset set to ' +
+                         str(offset_list[1]) + ' counts.')
+            caldict['chB_1x_offset'] = offset_list[1]
+            caldict['chB_1x_offset_caldate'] = datetime.now()
+        elif gainlist[1] == 1: # Channel B set for 10x gain
+            logger.debug('Channel B offset set to ' +
+                        str(offset_list[1]) + ' counts.')
+            caldict['chB_10x_offset'] = offset_list[1]
+            caldict['chB_10x_offset_caldate'] = datetime.now()
+    except KeyboardInterrupt:
+        print(' ')
+        logger.info('Offset calibration skipped')
     return caldict
 
 
 
 def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
     """Measure and record voltage slope coefficients.
-    
+
     This doesn't measure all slope coeffients -- just those for the
     gain settings being used.
 
@@ -316,37 +327,45 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
     slope_list = []
     gainlist = utils.set_hw_gain(handle,gainlist)
     try:
-         raw_input(
-             '* Connect ' + '{:0.3f}'.format(calvolt) +
-             'V calibration voltage and press return (Control-C to skip)'
-         )
-         rawdata = utils.get_uncal_forced_data(handle,ctrl_reg)
-         offcal_data = get_offcal_data(caldict,gainlist,rawdata)
-         for channel in range(2):
-             slope_list.append(calvolt/(average(offcal_data[channel])))
-         if gainlist[0] == 0: # Channel A set for 1x gain
-             logger.debug('Channel A 1x slope set to ' +
-                          str(slope_list[0]) + ' Volts per count.')
-             caldict['chA_1x_slope'] = slope_list[0]
-             caldict['chA_1x_slope_caldate'] = datetime.now()
-         elif gainlist[0] == 1: # Channel A set for 10x gain
-             logger.debug('Channel A 10x slope set to ' +
-                          str(slope_list[0]) + ' Volts per count.')
-             caldict['chA_10x_slope'] = slope_list[0] 
-             caldict['chA_10x_slope_caldate'] = datetime.now()
-         if gainlist[1] == 0: # Channel B set for 1x gain
-             logger.debug('Channel B 1x slope set to ' +
-                          str(slope_list[1]) + ' Volts per count.')
-             caldict['chB_1x_slope'] = slope_list[1]
-             caldict['chB_1x_slope_caldate'] = datetime.now()
-         elif gainlist[1] == 1: # Channel B set for 10x gain
-             logger.debug('Channel B 10x slope set to ' +
-                          str(slope_list[1]) + ' Volts per count.')
-             caldict['chB_10x_slope'] = slope_list[1]
-             caldict['chB_10x_slope_caldate'] = datetime.now()
+        raw_input(
+            '* Connect ' + '{:0.3f}'.format(calvolt) +
+            'V calibration voltage and press return (Control-C to skip)'
+        )
+        for capturenum in range(int(config['Acquire']['averages'])):
+            tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
+            logger.info('Acquiring trace ' + str(capturenum + 1) +
+                        ' of ' + str(config['Acquire']['averages']))
+            if capturenum == 0:
+                sumdata = tracedata
+            else:
+                sumdata = add(sumdata,tracedata)
+            avgdata = divide(sumdata,float(capturenum +1))
+        offcal_data = get_offcal_data(caldict,gainlist,avgdata)
+        for channel in range(2):
+            slope_list.append(calvolt/(average(offcal_data[channel])))
+        if gainlist[0] == 0: # Channel A set for 1x gain
+            logger.debug('Channel A 1x slope set to ' +
+                         str(slope_list[0]) + ' Volts per count.')
+            caldict['chA_1x_slope'] = slope_list[0]
+            caldict['chA_1x_slope_caldate'] = datetime.now()
+        elif gainlist[0] == 1: # Channel A set for 10x gain
+            logger.debug('Channel A 10x slope set to ' +
+                         str(slope_list[0]) + ' Volts per count.')
+            caldict['chA_10x_slope'] = slope_list[0]
+            caldict['chA_10x_slope_caldate'] = datetime.now()
+        if gainlist[1] == 0: # Channel B set for 1x gain
+            logger.debug('Channel B 1x slope set to ' +
+                         str(slope_list[1]) + ' Volts per count.')
+            caldict['chB_1x_slope'] = slope_list[1]
+            caldict['chB_1x_slope_caldate'] = datetime.now()
+        elif gainlist[1] == 1: # Channel B set for 10x gain
+            logger.debug('Channel B 10x slope set to ' +
+                         str(slope_list[1]) + ' Volts per count.')
+            caldict['chB_10x_slope'] = slope_list[1]
+            caldict['chB_10x_slope_caldate'] = datetime.now()
     except KeyboardInterrupt:
-         print(' ')
-         logger.info('Slope calibration skipped')
+        print(' ')
+        logger.info('Slope calibration skipped')
     return caldict
 
 # plotdata()
@@ -365,7 +384,7 @@ def plotdata(timedata, voltdata, trigdict):
     gplot.ylabel('Voltage (V)')
     gplot("set yrange [*:*]")
     gplot("set format x '%0.0s %c'")
-    gplot('set pointsize 1') 
+    gplot('set pointsize 1')
     gdata_cha_notime = Gnuplot.PlotItems.Data(
         voltdata[0],title='Channel A')
     gdata_cha = Gnuplot.PlotItems.Data(
@@ -376,10 +395,10 @@ def plotdata(timedata, voltdata, trigdict):
     # Add the trigger crosshair
     if (trigdict['trigsrc'] < 3):
         trigtime = timedata[1024-trigdict['trigpts']]
-        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' + 
+        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' +
               str(trigtime) + ',graph 1 nohead linetype 0')
         gplot('set arrow from graph 0,first ' + str(trigdict['triglev']) +
-              ' to graph 1,first ' + str(trigdict['triglev']) + 
+              ' to graph 1,first ' + str(trigdict['triglev']) +
               ' nohead linetype 0')
         gplot('replot')
     savefilename = ('trig.eps')
@@ -387,19 +406,19 @@ def plotdata(timedata, voltdata, trigdict):
     gplot("set output '" + savefilename + "'")
     gplot('replot')
     gplot('set terminal x11')
-    raw_input('* Press return to dismiss plot and exit...')    
+    raw_input('* Press return to dismiss plot and exit...')
 
 
 
 # ------------------------- Main procedure ----------------------------
-def main(): 
+def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
     caldict = utils.load_cal(config['Calibration']['calfile'])
-    
+
     # Trigger is hard coded to internal (auto trigger) for the
     # calibration code.
-    trigdict = utils.get_trig_dict(3,0,0,0) 
+    trigdict = utils.get_trig_dict(3,0,0,0)
 
     cgr = utils.get_cgr()
     gainlist = utils.set_hw_gain(
@@ -407,7 +426,7 @@ def main():
               int(config['Inputs']['Bprobe'])
           ]
     )
-    
+
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
     [ctrl_reg, fsamp_act] = utils.set_ctrl_reg(
@@ -417,14 +436,13 @@ def main():
         logger.warning(
             'Requested sample frequency ' + '{:0.3f} kHz '.format(
                 float(config['Acquire']['rate'])/1000
-            ) 
+            )
             + 'adjusted to ' + '{:0.3f} kHz '.format(
                 float(fsamp_act)/1000
             )
         )
-    
+
     # Start the offset calibration
-    raw_input('* Remove all inputs and press return...')
     caldict = get_offsets(cgr, ctrl_reg, gainlist, caldict, config)
 
     # Start the slope calibration
