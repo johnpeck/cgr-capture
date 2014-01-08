@@ -103,15 +103,16 @@ configfile = args.rcfile # The configuration file name
 # ---------- Done with configuring runtime configuration --------------
 
 
-# load_config(configuration file name)
-#
-# Open the configuration file (if it exists) and return the
-# configuration object.  If the file doesn't exist, call the init
-# function to create it.
-#
-# This function could probably go in the library, since there's
-# nothing unique about it.
 def load_config(configFileName):
+    """Open the configuration file and return its object.
+    
+    If the file doesn't exist, call the init_config() function to
+    create it using some defaults.
+
+    Arguments: 
+    configFileName -- File name of the configuration file
+
+    """
     try:
         logger.info('Reading configuration file ' + configFileName)
         config = ConfigObj(configFileName,file_error=True)
@@ -125,7 +126,7 @@ def load_config(configFileName):
 
 
 def init_config(configFileName):
-    """ Initialize the configuration file.
+    """Initialize the configuration file.
 
     The file name should be specified by the user in the application
     code.  This function is unique to the application, so it's not
