@@ -3,8 +3,30 @@
 * ---------------------------- Dated notes -----------------------------
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
+* cgr-capture script
+** TODO Create savedata function
+   - Unfortunately, the datafile will need to have a lot of metadata
+     in it.  The saveddata function needs to take the config object as
+     an argument, since I'll be specifying the save file name in
+     there.
+** DONE Calibration factor dates must be checked when used
+   - If the dates are 'none' or more than a year apart, a warning
+     should be raised.  See the caldict_default dictionary in utils.py
+     for a list of all calibration factors and their associated dates.
+   - I started doing this with get_cal_data() from utils.py.  This
+     needs to be extended to the remaining calibration factors.
+** TODO There should be a file to keep last port
+   - Should have the last port connected to.  This could be something
+     like cgr-session.pkl.
+** TODO Custom serial port list should be added to the config
+** DONE Cal file should be set in the config file
+** DONE One command-line argument should be init file
+   - The default should be cgr-capture.cfg, but it should accept
+     alternates.
+** DONE Check to see that averaging works
 * cgr-cal script
-** TODO Add makefile to automate install and reindent steps
+** DONE Add support for averaging while measuring slopes
+** DONE Add makefile to automate install and reindent steps
    - This will give me a place to write comments about the reindent
      and installation scripts.  As long as the makefile isn't in the
      manifest, it won't be added to the package.
@@ -12,7 +34,6 @@
    - Offset counts should be within 10 counts of zero, and offsets
      should be within 10% of 45mV / count.  Fail the calibration and
      don't write any calibration factors if this happens.
-** TODO Add support for averaging while measuring slopes
 ** DONE Add way to escape offset calibration
 ** DONE Config file should specify which voltage to ask for
 ** DONE Calibration dates need to be added to caldict
@@ -38,19 +59,3 @@
    - Right now the function runs through both gain settings.  I think
      a better way is to only use the gain setting set in the config
      file.  
-* cgr-capture script
-** DONE Calibration factor dates must be checked when used
-   - If the dates are 'none' or more than a year apart, a warning
-     should be raised.  See the caldict_default dictionary in utils.py
-     for a list of all calibration factors and their associated dates.
-   - I started doing this with get_cal_data() from utils.py.  This
-     needs to be extended to the remaining calibration factors.
-** TODO There should be a file to keep last port
-   - Should have the last port connected to.  This could be something
-     like cgr-session.pkl.
-** TODO Custom serial port list should be added to the config
-** DONE Cal file should be set in the config file
-** DONE One command-line argument should be init file
-   - The default should be cgr-capture.cfg, but it should accept
-     alternates.
-** DONE Check to see that averaging works

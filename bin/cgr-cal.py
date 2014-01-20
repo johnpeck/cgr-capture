@@ -31,9 +31,10 @@ from colorlog import ColoredFormatter
 logger = logging.getLogger('root')
 logger.setLevel(logging.DEBUG)
 
-# create console handler (ch) and set level to debug
+# create console handler (ch) and set level
+# (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 
 # create file handler and set level to debug
 fh = logging.FileHandler('cgrlog.log',mode='a',encoding=None,delay=False)
@@ -264,7 +265,8 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     gainlist = utils.set_hw_gain(handle,gainlist)
     try:
         raw_input(
-           '* Disconnect all inputs and press return (Control-C to skip)'
+            '* Disconnect all inputs and press return,\n' +
+            '  or Control-C to skip offset calibration'
         )
         for capturenum in range(int(config['Acquire']['averages'])):
             tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
@@ -329,7 +331,8 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
     try:
         raw_input(
             '* Connect ' + '{:0.3f}'.format(calvolt) +
-            'V calibration voltage and press return (Control-C to skip)'
+            'V calibration voltage and press return,\n' +
+            '  or Control-C to skip slope calibration'
         )
         for capturenum in range(int(config['Acquire']['averages'])):
             tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
@@ -345,22 +348,30 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
             slope_list.append(calvolt/(average(offcal_data[channel])))
         if gainlist[0] == 0: # Channel A set for 1x gain
             logger.debug('Channel A 1x slope set to ' +
-                         str(slope_list[0]) + ' Volts per count.')
+                         '{:0.1f}'.format(1000 * slope_list[0]) + 
+                         ' millivolts per count.'
+            )
             caldict['chA_1x_slope'] = slope_list[0]
             caldict['chA_1x_slope_caldate'] = datetime.now()
         elif gainlist[0] == 1: # Channel A set for 10x gain
             logger.debug('Channel A 10x slope set to ' +
-                         str(slope_list[0]) + ' Volts per count.')
+                         '{:0.1f}'.format(1000 * slope_list[0]) +
+                         ' millivolts per count.'
+            )
             caldict['chA_10x_slope'] = slope_list[0]
             caldict['chA_10x_slope_caldate'] = datetime.now()
         if gainlist[1] == 0: # Channel B set for 1x gain
             logger.debug('Channel B 1x slope set to ' +
-                         str(slope_list[1]) + ' Volts per count.')
+                         '{:0.1f}'.format(1000 * slope_list[1]) + 
+                         ' millivolts per count.'
+            )
             caldict['chB_1x_slope'] = slope_list[1]
             caldict['chB_1x_slope_caldate'] = datetime.now()
         elif gainlist[1] == 1: # Channel B set for 10x gain
             logger.debug('Channel B 10x slope set to ' +
-                         str(slope_list[1]) + ' Volts per count.')
+                         '{:0.1f}'.format(1000 * slope_list[1]) + 
+                         ' millivolts per count.'
+            )
             caldict['chB_10x_slope'] = slope_list[1]
             caldict['chB_10x_slope_caldate'] = datetime.now()
     except KeyboardInterrupt:
@@ -368,10 +379,10 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
         logger.info('Slope calibration skipped')
     return caldict
 
-# plotdata()
-#
-# Plot data from both channels.
+
 def plotdata(timedata, voltdata, trigdict):
+    """Plot data from both channels
+    """
     # Set debug=1 to see gnuplot commands
     gplot = Gnuplot.Gnuplot(debug=0)
     gplot('set terminal x11')
@@ -420,7 +431,7 @@ def main():
     # calibration code.
     trigdict = utils.get_trig_dict(3,0,0,0)
 
-    cgr = utils.get_cgr()
+    cgr = utils.get_cgr() # Connect to the unit
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])

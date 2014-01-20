@@ -16,7 +16,7 @@ parser.add_argument("-r", "--rcfile" , default="cgr-capture.cfg",
                     help="Runtime configuration file")
 args = parser.parse_args()
 if args.outfile:
-   print('Output file specified is ' + args.outfile)
+    print('Output file specified is ' + args.outfile)
 
 #------ --------- Done with configuring argument parsing --------------
 
@@ -113,12 +113,12 @@ from configobj import ConfigObj # For writing and reading config file
 # Open the configuration file (if it exists) and return the
 # configuration object.  If the file doesn't exist, call the init
 # function to create it.
-# 
+#
 # This function could probably go in the library, since there's
 # nothing unique about it.
 def load_config(configFileName):
     try:
-        logger.info('Reading configuration file ' + configFileName)   
+        logger.info('Reading configuration file ' + configFileName)
         config = ConfigObj(configFileName,file_error=True)
         return config
     except IOError:
@@ -130,12 +130,12 @@ def load_config(configFileName):
 
 
 
-# init_config(configuration file name)
-#
-# Initialize the configuration file.  The file name should be
-# specified by the user in the application code.  This function is
-# unique to the application, so it's not really a library function.
 def init_config(configFileName):
+    """ Initialize the configuration file.
+    
+    Arguments:
+      configFileName -- Configuration file name
+    """
     config = ConfigObj()
     config.filename = configFileName
     config.initial_comment = [
@@ -152,7 +152,7 @@ def init_config(configFileName):
         "The calibration file in Python's pickle format"
         ]
 
-    
+
     #------------------------- Trigger section ------------------------
     config['Trigger'] = {}
     config['Trigger'].comments = {}
@@ -160,7 +160,7 @@ def init_config(configFileName):
     config['Trigger']['level'] = 1.025
     # config.inline_comments['Trigger'] = 'Inline comment about trigger section'
     config['Trigger'].comments['level'] = ['The trigger level (Volts)']
-    
+
     # Trigger source
     config['Trigger']['source'] = 3
     config['Trigger'].comments['source'] = [
@@ -171,7 +171,7 @@ def init_config(configFileName):
         '2 -- external',
         '3 -- internal (Triggers generated regardless of any level)'
     ]
-    
+
     # Trigger polarity
     config['Trigger']['polarity'] = 0
     config['Trigger'].comments['polarity'] = [
@@ -192,7 +192,7 @@ def init_config(configFileName):
         'the trigger, and 100 are acquired after.',
         'Range: 0, 1, 2, ... , 1024'
     ]
-    
+
     #-------------------------- Inputs section ------------------------
     config['Inputs'] = {}
     config['Inputs'].comments = {}
@@ -237,9 +237,9 @@ def init_config(configFileName):
         'Number of acquisitions to average'
     ]
 
-    
+
     # Writing our configuration file
-    logger.debug('Initializing configuration file ' + 
+    logger.debug('Initializing configuration file ' +
                  configFileName)
     config.write()
     return config
@@ -261,7 +261,7 @@ def plotdata(timedata, voltdata, trigdict):
     gplot.ylabel('Voltage (V)')
     gplot("set yrange [*:*]")
     gplot("set format x '%0.0s %c'")
-    gplot('set pointsize 1') 
+    gplot('set pointsize 1')
     gdata_cha_notime = Gnuplot.PlotItems.Data(
         voltdata[0],title='Channel A')
     gdata_cha = Gnuplot.PlotItems.Data(
@@ -272,10 +272,10 @@ def plotdata(timedata, voltdata, trigdict):
     # Add the trigger crosshair
     if (trigdict['trigsrc'] < 3):
         trigtime = timedata[1024-trigdict['trigpts']]
-        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' + 
+        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' +
               str(trigtime) + ',graph 1 nohead linetype 0')
         gplot('set arrow from graph 0,first ' + str(trigdict['triglev']) +
-              ' to graph 1,first ' + str(trigdict['triglev']) + 
+              ' to graph 1,first ' + str(trigdict['triglev']) +
               ' nohead linetype 0')
         gplot('replot')
     savefilename = ('trig.eps')
@@ -285,7 +285,7 @@ def plotdata(timedata, voltdata, trigdict):
     gplot('set terminal x11')
     raw_input('* Press return to dismiss plot and exit...')
 
-        
+
 
 
 # ------------------------- Main procedure ----------------------------
@@ -293,8 +293,8 @@ def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
     caldict = utils.load_cal(config['Calibration']['calfile'])
-    trigdict = utils.get_trig_dict( int(config['Trigger']['source']), 
-                                     float(config['Trigger']['level']), 
+    trigdict = utils.get_trig_dict( int(config['Trigger']['source']),
+                                     float(config['Trigger']['level']),
                                      int(config['Trigger']['polarity']),
                                      int(config['Trigger']['points'])
     )
@@ -315,14 +315,14 @@ def main():
         logger.warning(
             'Requested sample frequency ' + '{:0.3f} kHz '.format(
                 float(config['Acquire']['rate'])/1000
-            ) 
+            )
             + 'adjusted to ' + '{:0.3f} kHz '.format(
                 float(fsamp_act)/1000
             )
         )
 
     # Wait for trigger, then return uncalibrated data
-    
+
     for capturenum in range(int(config['Acquire']['averages'])):
         if trigdict['trigsrc'] == 3:
             # Internal trigger

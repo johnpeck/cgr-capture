@@ -124,18 +124,14 @@ def load_cal(calfile):
         caldict = caldict_default
     return caldict
 
-# get_cgr() 
-#
-# Returns a serial object for the cgr scope, or an error
-# message if the connection fails.
-#
-# Inputs:
-#     None
-#
-# Returns: 
-#     cgr: Serial communication object corresponding to the CGR-101
-#          USB oscilloscope.
+
 def get_cgr():
+    """Return a serial object for the cgr scope.
+
+    Arguments:
+      None
+
+    """
     # The comports() function returns an iterable that yields tuples of
     # three strings:
     #
