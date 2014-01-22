@@ -11,7 +11,9 @@ import sys # For sys.exit()
 import argparse
 parser = argparse.ArgumentParser(
    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("-o", "--outfile", help="output filename")
+parser.add_argument("-o", "--outfile", help="output filename",
+                    default="last_capture.dat")
+)
 parser.add_argument("-r", "--rcfile" , default="cgr-capture.cfg",
                     help="Runtime configuration file")
 args = parser.parse_args()
@@ -131,7 +133,7 @@ def load_config(configFileName):
 
 
 def init_config(configFileName):
-    """ Initialize the configuration file.
+    """ Initialize the configuration file and return config object.
     
     Arguments:
       configFileName -- Configuration file name
@@ -285,8 +287,14 @@ def plotdata(timedata, voltdata, trigdict):
     gplot('set terminal x11')
     raw_input('* Press return to dismiss plot and exit...')
 
+def savedata(config, timedata, voltdata):
+    """ Write data to a file.
 
-
+    Arguments:
+      config -- The configuration object created from the configuration
+                file.
+    """
+    
 
 # ------------------------- Main procedure ----------------------------
 def main():
