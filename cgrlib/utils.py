@@ -256,13 +256,18 @@ def get_state(handle):
     return retstr
 
 
-# get_timelist(sample rate)
-#
-# Returns the list of sample times.  Remember that the CGR-101 takes
-# 2048 samples, but this is a total for both channels.  Each channel
-# will have 1024 samples.  The sample rate calculation is based on
-# these 1024 samples -- not 2048.
 def get_timelist(fsamp):
+    """Return a list of sample times
+
+    Arguments:
+      fsamp -- Sample rate in Hz
+
+    Remember that the CGR-101 takes 2048 samples, but this is a total
+    for both channels.  Each channel will have 1024 samples.  The
+    sample rate calculation is based on these 1024 samples -- not
+    2048.
+
+    """
     timelist = []
     for samplenum in range(1024):
         timelist.append( samplenum * (1.0/fsamp) )

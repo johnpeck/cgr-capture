@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # cgr_capture.py
 #
 # Captures one buffer of data from the cgr-101 USB scope
@@ -6,16 +8,19 @@ import time     # For making pauses
 import os       # For basic file I/O
 import ConfigParser # For reading and writing the configuration file
 import sys # For sys.exit()
+from itertools import izip
+
 
 # --------------------- Configure argument parsing --------------------
 import argparse
 parser = argparse.ArgumentParser(
    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-o", "--outfile", help="output filename",
-                    default="last_capture.dat")
+                    default="last_capture.dat"
 )
 parser.add_argument("-r", "--rcfile" , default="cgr-capture.cfg",
-                    help="Runtime configuration file")
+                    help="Runtime configuration file"
+)
 args = parser.parse_args()
 if args.outfile:
     print('Output file specified is ' + args.outfile)
@@ -134,7 +139,7 @@ def load_config(configFileName):
 
 def init_config(configFileName):
     """ Initialize the configuration file and return config object.
-    
+
     Arguments:
       configFileName -- Configuration file name
     """
@@ -247,10 +252,10 @@ def init_config(configFileName):
     return config
 
 
-# plotdata()
-#
-# Plot data from both channels.
+
 def plotdata(timedata, voltdata, trigdict):
+    """Plot data from both channels.
+    """
     # Set debug=1 to see gnuplot commands
     gplot = Gnuplot.Gnuplot(debug=0)
     gplot('set terminal x11')
@@ -293,8 +298,27 @@ def savedata(config, timedata, voltdata):
     Arguments:
       config -- The configuration object created from the configuration
                 file.
+      timedata -- List of sample times.
+      voltdata -- List of voltage samples:
+                  voltdata[0] -- Samples from channel A
+                  voltdata[1] -- Samples from channel B
     """
-    
+    # Open output file
+    with open(args.outfile, 'w') as outfile:
+        logger.info('Writing data to ' + args.outfile)
+        outfile.write('# Created by cgr-capture' + '\n')
+        outfile.write('{:<20}'.format('# Time (s)'))
+        outfile.write('{:<20}'.format('Channel A (V)'))
+        outfile.write('{:<20}'.format('Channel B (V)') + '\n')
+        for timepoint, avolt, bvolt in zip(timedata, voltdata[0], voltdata[1]):
+            # Write the time coordinate
+            outfile.write('{:<20.5e}'.format(timepoint))
+            # Write the A datapoint
+            outfile.write('{:<20.5e}'.format(avolt))
+            # Write the B datapoint
+            outfile.write('{:<20.5e}'.format(bvolt) + '\n')
+
+
 
 # ------------------------- Main procedure ----------------------------
 def main():
@@ -355,6 +379,7 @@ def main():
        'Plotting average of ' + str(capturenum + 1) + ' traces.'
     )
     plotdata(timedata, voltdata, trigdict)
+    savedata(config, timedata, voltdata)
 
 
 # Execute main() from command line

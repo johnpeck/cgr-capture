@@ -106,11 +106,11 @@ configfile = args.rcfile # The configuration file name
 
 def load_config(configFileName):
     """Open the configuration file and return its object.
-    
+
     If the file doesn't exist, call the init_config() function to
     create it using some defaults.
 
-    Arguments: 
+    Arguments:
     configFileName -- File name of the configuration file
 
     """
@@ -349,7 +349,7 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
             slope_list.append(calvolt/(average(offcal_data[channel])))
         if gainlist[0] == 0: # Channel A set for 1x gain
             logger.debug('Channel A 1x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[0]) + 
+                         '{:0.1f}'.format(1000 * slope_list[0]) +
                          ' millivolts per count.'
             )
             caldict['chA_1x_slope'] = slope_list[0]
@@ -363,14 +363,14 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
             caldict['chA_10x_slope_caldate'] = datetime.now()
         if gainlist[1] == 0: # Channel B set for 1x gain
             logger.debug('Channel B 1x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[1]) + 
+                         '{:0.1f}'.format(1000 * slope_list[1]) +
                          ' millivolts per count.'
             )
             caldict['chB_1x_slope'] = slope_list[1]
             caldict['chB_1x_slope_caldate'] = datetime.now()
         elif gainlist[1] == 1: # Channel B set for 10x gain
             logger.debug('Channel B 10x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[1]) + 
+                         '{:0.1f}'.format(1000 * slope_list[1]) +
                          ' millivolts per count.'
             )
             caldict['chB_10x_slope'] = slope_list[1]

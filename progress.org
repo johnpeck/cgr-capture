@@ -3,6 +3,11 @@
 * ---------------------------- Dated notes -----------------------------
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
+* setup.py script
+** TODO Restructure project to have a tools directory
+   - The tools directory will have the cgr-capture and cgr-cal
+     scripts.  This will allow me to struture the project like
+     pelican, and use the console scripts method to create executables.
 * cgr-capture script
 ** TODO Create savedata function
    - Unfortunately, the datafile will need to have a lot of metadata
@@ -20,6 +25,9 @@
      like cgr-session.pkl.
 ** TODO Custom serial port list should be added to the config
 ** DONE Cal file should be set in the config file
+** TODO Save data function should write timestamp to file
+** TODO I should just be able to call cgr-capture
+   - Take a look at what pelican does to set this up.
 ** DONE One command-line argument should be init file
    - The default should be cgr-capture.cfg, but it should accept
      alternates.

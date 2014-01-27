@@ -1,7 +1,15 @@
-from distutils.core import setup
+from setuptools import setup
+
+# entry_points = {
+#     'console_scripts': [
+#         'cgr-capture = cgr-capture:main'
+#     ]
+# }
+
+
 setup(
     name = 'cgrlib',
-    packages = ['cgrlib', 'cgrlib.test'], # this must be the same as the name above
+    packages = ['cgrlib','cgrlib.test'], # this must be the same as the name above
     scripts=['bin/cgr-capture.py'],
     version = '0.1.0',
     license='LICENSE.txt',
@@ -15,5 +23,6 @@ setup(
         "gnuplot-py >= 1.8",
         "colorlog >= 2.0.0"
     ],
+    # entry_points = entry_points,
     keywords = ['testing', 'logging', 'example'] # arbitrary keywords
 )
