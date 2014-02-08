@@ -4,11 +4,17 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * setup.py script
-** TODO Restructure project to have a tools directory
+** DONE Check to see if dependencies actually get updated
+   - They do!  You just don't see all the output from the setup.py script.
+** DONE Restructure project to have a tools directory
    - The tools directory will have the cgr-capture and cgr-cal
      scripts.  This will allow me to struture the project like
      pelican, and use the console scripts method to create executables.
 * cgr-capture script
+** TODO What happens if cgr-capture is run from whatever directory?
+   - Seems like I need to have a search routine for the config file.
+   - Nice!  The script creates a default config file from wherever the
+     script was called from!  This is exactly what I want!
 ** TODO Create savedata function
    - Unfortunately, the datafile will need to have a lot of metadata
      in it.  The saveddata function needs to take the config object as
@@ -33,6 +39,7 @@
      alternates.
 ** DONE Check to see that averaging works
 * cgr-cal script
+** TODO What is this output file?  
 ** DONE Add support for averaging while measuring slopes
 ** DONE Add makefile to automate install and reindent steps
    - This will give me a place to write comments about the reindent
@@ -67,3 +74,5 @@
    - Right now the function runs through both gain settings.  I think
      a better way is to only use the gain setting set in the config
      file.  
+* readme file
+** TODO Document how to fix gnuplot script
