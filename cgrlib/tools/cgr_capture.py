@@ -22,10 +22,8 @@ parser.add_argument("-r", "--rcfile" , default="cgr-capture.cfg",
                     help="Runtime configuration file"
 )
 args = parser.parse_args()
-if args.outfile:
-    print('Output file specified is ' + args.outfile)
 
-#------ --------- Done with configuring argument parsing --------------
+#---------------- Done with configuring argument parsing --------------
 
 
 
@@ -251,46 +249,53 @@ def init_config(configFileName):
     config.write()
     return config
 
-
-
-def plotdata(timedata, voltdata, trigdict):
-    """Plot data from both channels.
+def plotinit():
+    """ Returns the configured gnuplot plot object.
     """
-    # Set debug=1 to see gnuplot commands
-    gplot = Gnuplot.Gnuplot(debug=0)
-    gplot('set terminal x11')
-    # titlestr = ('Trigger at sample ' +
-    #             ' ({:0.3f} ms)'.format(1000 * timedata[1]))
-    # gplot('set title "' + titlestr + '"')
-    gplot('set style data lines')
-    gplot('set key bottom left')
-    gplot.xlabel('Time (s)')
-    gplot.ylabel('Voltage (V)')
-    gplot("set yrange [*:*]")
-    gplot("set format x '%0.0s %c'")
-    gplot('set pointsize 1')
+    # Set debug=1 to see gnuplot commands during execution.
+    plotobj = Gnuplot.Gnuplot(debug=0)
+    plotobj('set terminal x11') # Send a gnuplot command
+    plotobj('set style data lines')
+    plotobj('set key bottom left')
+    plotobj.xlabel('Time (s)')
+    plotobj.ylabel('Voltage (V)')
+    plotobj("set yrange [*:*]")
+    plotobj("set format x '%0.0s %c'")
+    plotobj('set pointsize 1')
+    return plotobj
+
+
+def plotdata(plotobj, timedata, voltdata, trigdict):
+    """Plot data from both channels.
+
+    Arguments:
+      plotobj -- The gnuplot plot object
+      timedata -- List of sample times
+      voltdata -- 1024 x 2 list of voltage samples
+      trigdict -- Trigger parameter dictionary
+    """
     gdata_cha_notime = Gnuplot.PlotItems.Data(
         voltdata[0],title='Channel A')
     gdata_cha = Gnuplot.PlotItems.Data(
         timedata,voltdata[0],title='Channel A')
     gdata_chb = Gnuplot.PlotItems.Data(
         timedata,voltdata[1],title='Channel B')
-    gplot.plot(gdata_cha,gdata_chb) # Plot the data
+    plotobj.plot(gdata_cha,gdata_chb) # Plot the data
     # Add the trigger crosshair
     if (trigdict['trigsrc'] < 3):
         trigtime = timedata[1024-trigdict['trigpts']]
-        gplot('set arrow from ' + str(trigtime) + ',graph 0 to ' +
-              str(trigtime) + ',graph 1 nohead linetype 0')
-        gplot('set arrow from graph 0,first ' + str(trigdict['triglev']) +
-              ' to graph 1,first ' + str(trigdict['triglev']) +
-              ' nohead linetype 0')
-        gplot('replot')
+        plotobj('set arrow from ' + str(trigtime) + ',graph 0 to ' +
+                str(trigtime) + ',graph 1 nohead linetype 0')
+        plotobj('set arrow from graph 0,first ' + str(trigdict['triglev']) +
+                ' to graph 1,first ' + str(trigdict['triglev']) +
+                ' nohead linetype 0')
+        plotobj('replot')
     savefilename = ('trig.eps')
-    gplot('set terminal postscript eps color')
-    gplot("set output '" + savefilename + "'")
-    gplot('replot')
-    gplot('set terminal x11')
-    raw_input('* Press return to dismiss plot and exit...')
+    plotobj('set terminal postscript eps color')
+    plotobj("set output '" + savefilename + "'")
+    plotobj('replot')
+    plotobj('set terminal x11')
+
 
 def savedata(config, timedata, voltdata):
     """ Write data to a file.
@@ -354,7 +359,7 @@ def main():
         )
 
     # Wait for trigger, then return uncalibrated data
-
+    gplot = plotinit() # Create plot object
     for capturenum in range(int(config['Acquire']['averages'])):
         if trigdict['trigsrc'] == 3:
             # Internal trigger
@@ -378,8 +383,9 @@ def main():
     logger.debug(
        'Plotting average of ' + str(capturenum + 1) + ' traces.'
     )
-    plotdata(timedata, voltdata, trigdict)
+    plotdata(gplot, timedata, voltdata, trigdict)
     savedata(config, timedata, voltdata)
+    raw_input('Press any key to close plot and exit...')
 
 
 # Execute main() from command line

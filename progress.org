@@ -9,13 +9,23 @@
 ** DONE Restructure project to have a tools directory
    - The tools directory will have the cgr-capture and cgr-cal
      scripts.  This will allow me to struture the project like
-     pelican, and use the console scripts method to create executables.
+     pelican, and use the console scripts method to create
+     executables.
+** TODO Store the version number in a better way
+   - I need to be able to print out the version number on the command line.
+   - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
-** TODO What happens if cgr-capture is run from whatever directory?
+** DONE Write plotinit() function
+   - Configures the plot, returns the plot object (gplot)
+** DONE gplot object needs to be created in the main loop
+   - This keeps the plot from being destroyed until the program is
+     done.  This allows plotting the result of each average without
+     destroying the plot.
+** DONE What happens if cgr-capture is run from whatever directory?
    - Seems like I need to have a search routine for the config file.
    - Nice!  The script creates a default config file from wherever the
      script was called from!  This is exactly what I want!
-** TODO Create savedata function
+** DONE Create savedata function
    - Unfortunately, the datafile will need to have a lot of metadata
      in it.  The saveddata function needs to take the config object as
      an argument, since I'll be specifying the save file name in
