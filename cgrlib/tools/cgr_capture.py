@@ -374,16 +374,18 @@ def main():
         else:
             sumdata = add(sumdata,tracedata)
         avgdata = divide(sumdata,float(capturenum +1))
+        # Apply calibration
+        voltdata = utils.get_cal_data(
+            caldict,gainlist,[avgdata[0],avgdata[1]]
+        )
+        timedata = utils.get_timelist(fsamp_act)
+        logger.debug(
+            'Plotting average of ' + str(capturenum + 1) + ' traces.'
+        )
+        plotdata(gplot, timedata, voltdata, trigdict)
 
-    # Apply calibration
-    voltdata = utils.get_cal_data(
-       caldict,gainlist,[avgdata[0],avgdata[1]]
-    )
-    timedata = utils.get_timelist(fsamp_act)
-    logger.debug(
-       'Plotting average of ' + str(capturenum + 1) + ' traces.'
-    )
-    plotdata(gplot, timedata, voltdata, trigdict)
+
+
     savedata(config, timedata, voltdata)
     raw_input('Press any key to close plot and exit...')
 
