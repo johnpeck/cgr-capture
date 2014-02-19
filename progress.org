@@ -3,6 +3,10 @@
 * ---------------------------- Dated notes -----------------------------
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
+* cgrlib
+** TODO Get rid of message delay
+   - Do this after testing various delays.  Realize that you'll never
+     get much faster than 10ms of delay.
 * setup.py script
 ** DONE Check to see if dependencies actually get updated
    - They do!  You just don't see all the output from the setup.py script.
@@ -15,6 +19,7 @@
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
+** TODO Save data function should write timestamp to file
 ** DONE Write plotinit() function
    - Configures the plot, returns the plot object (gplot)
 ** DONE gplot object needs to be created in the main loop
@@ -36,12 +41,11 @@
      for a list of all calibration factors and their associated dates.
    - I started doing this with get_cal_data() from utils.py.  This
      needs to be extended to the remaining calibration factors.
-** TODO There should be a file to keep last port
-   - Should have the last port connected to.  This could be something
-     like cgr-session.pkl.
 ** TODO Custom serial port list should be added to the config
+   - The config should have a connection section.  There should be a
+     list of custom serial ports, and there should be a lastport
+     variable.  This lastport variable will be written at runtime.
 ** DONE Cal file should be set in the config file
-** TODO Save data function should write timestamp to file
 ** TODO I should just be able to call cgr-capture
    - Take a look at what pelican does to set this up.
 ** DONE One command-line argument should be init file
@@ -49,7 +53,8 @@
      alternates.
 ** DONE Check to see that averaging works
 * cgr-cal script
-** TODO What is this output file?  
+** TODO Test new cgr-cal with new plotting code
+** DONE What is this output file?  
 ** DONE Add support for averaging while measuring slopes
 ** DONE Add makefile to automate install and reindent steps
    - This will give me a place to write comments about the reindent
