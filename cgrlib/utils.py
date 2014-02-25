@@ -28,9 +28,14 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
-# Specify a default calibration dictionary.  This dictionary
-# definition is also where all the calibration factors are defined.
-# If you want to add another factor, this is the place to do it.
+
+""" Specify a default calibration dictionary.  
+
+This dictionary definition is also where all the calibration factors
+are defined.  If you want to add another factor, this is the place to
+do it.
+
+"""
 caldict_default = {'chA_1x_offset': 0,
                    'chA_1x_offset_caldate': 'none',
                    'chA_1x_slope': 0.0445,
@@ -50,23 +55,18 @@ caldict_default = {'chA_1x_offset': 0,
 }
 
 
-# write_cal(calfile, caldict)
-#
-# Writes the unit's calibration constants.  See the caldict_default
-# definition for a list of dictionary entries.  If the specified
-# calfile exists, it will be saved as calfile_old and a new calfile
-# will be written.
-#
-# Inputs:
-#     calfile: Filename for pickled calibration constants.  This
-#              filename should be specified in the application's
-#              configuration file.
-#
-#     caldict: A dictionary of (calibration factor names) : values
-#
-# Returns:
-#     None
 def write_cal(calfile, caldict):
+    """Write calibration constants to a file.
+
+    See the caldict_default definition for the list of dictionary
+    entries.  If the specified calfile exists, it will be saved as
+    calfile_old and a new calfile will be written.
+
+    Arguments:
+      calfile -- Filename for saving calibration constants.
+      caldict -- A dictionary of (calibration factor names) : values
+
+    """
     try:
         with open(calfile):
             # If this succeeds, the file already exists.  Copy the
@@ -91,20 +91,14 @@ def write_cal(calfile, caldict):
             fout.close()
         
 
-# load_cal(calibration file)
-#
-# Loads and returns the calibration constants.  Loads some defaults
-# into the calibration dictionary if a calibration file isn't found.
-#
-# Inputs:
-#     calfile: Filename for pickled calibration constants.  This
-#              filename should be specified in the application's
-#              configuration file.
-#
-# Returns:
-#     caldict: A dictionary of (calibration factor names) : values
-# 
 def load_cal(calfile):
+    """ Load and return calibration constant dictionary.
+
+    Arguments:
+      calfile -- Filename for calibration constants saved in Python's
+                 pickle format.
+
+    """
     try:
         module_logger.info('Loading calibration file ' + calfile)
         fin = open(calfile,'rb')
@@ -126,10 +120,7 @@ def load_cal(calfile):
 
 
 def get_cgr():
-    """Return a serial object for the cgr scope.
-
-    Arguments:
-      None
+    """ Return a serial object for the cgr scope
 
     """
     # The comports() function returns an iterable that yields tuples of
@@ -183,39 +174,39 @@ def get_cgr():
             print message
             sys.exit()
 
-
-
-
 def flush_cgr(handle):
     readstr = 'junk'
     while (len(readstr) > 0):
         readstr = handle.read(100)
         module_logger.info('Flushed ' + str(len(readstr)) + ' characters')
 
-
-# sendcmd(handle,command)
-#    
-# Send an ascii command string to the CGR scope
 def sendcmd(handle,cmd):
+    """ Send an ascii command string to the CGR scope.
+
+    Arguments:
+      handle -- Serial object for the CGR scope
+      cmd -- Command string
+
+    """
     handle.write(cmd + cmdterm)
     module_logger.debug('Sent command ' + cmd)
     time.sleep(0.1) # Don't know if there's a command buffer
 
 
-
-
-# get_samplebits(Requested sample rate)
-#
-# Given a sample rate in Hz, returns the closest possible hardware
-# sample rate setting.  This setting goes in bits 0:3 of the control
-# register.
-#
-# The sample rate is given by (20Ms/s)/2**N, where N is the 4-bit
-# value returned by this function.
-#
-# Returns:
-#  [value for control register, actual sample rate]
 def get_samplebits(fsamp_req):
+    """Returns a valid sample rate setting.
+
+    Given a sample rate in Hz, returns the closest possible hardware
+    sample rate setting.  This setting goes in bits 0:3 of the control
+    register.
+
+    The sample rate is given by (20Ms/s)/2**N, where N is the 4-bit
+    value returned by this function.
+
+    Arguments:
+      fsamp_req -- The requested sample rate in Hz.
+    
+    """
     baserate = 20e6 # Maximum sample rate
     ratelist = []
     for nval in range(2**4):
@@ -224,10 +215,14 @@ def get_samplebits(fsamp_req):
     setval = ratelist.index(fsamp_act)
     return [setval,fsamp_act]
 
-# askcgr(handle, command)
-#
-# Send a command to the unit and check for a response.
 def askcgr(handle,cmd):
+    """Send an ascii command to the CGR scope and return its reply.
+
+    Arguments:
+      handle -- Serial object for the CGR scope
+      cmd -- Command string
+
+    """
     sendcmd(handle,cmd)
     try:
         retstr = handle.readline()
@@ -235,18 +230,22 @@ def askcgr(handle,cmd):
     except:
         return('No reply')
 
-# get_state(handle)
-#
-# Returns the state string from the unit.  The string may be:
-# Returned string     Corresponding state
-# ---------------------------------------
-# State 1             Idle
-# State 2             Initializing capture
-# State 3             Wait for trigger signal to reset
-# State 4             Armed, waiting for capture
-# State 5             Capturing
-# State 6             Done
+
 def get_state(handle):
+    """ Return the CGR's state string
+
+    Returned string     Corresponding state
+    ---------------------------------------
+    State 1             Idle
+    State 2             Initializing capture
+    State 3             Wait for trigger signal to reset
+    State 4             Armed, waiting for capture
+    State 5             Capturing
+    State 6             Done
+
+    Arguments:
+      handle -- Serial object for the CGR scope
+    """
     handle.open()
     retstr = askcgr(handle,'S S')
     print(retstr)
@@ -274,13 +273,14 @@ def get_timelist(fsamp):
     return timelist
 
 
-# get_eeprom_offlist(handle)
-# 
-# Returns the offsets set in eeprom.  The offsets are in signed counts.
-#
-# [Channel A high range offset, Channel A low range offset,
-#  Channel B high range offset, Channel B low range offset]
 def get_eeprom_offlist(handle):
+    """Returns the offsets stored in the CGR's eeprom.  This will be a
+    list of signed integers:
+
+    [Channel A 10x range offset, Channel A 1x range offset,
+     Channel B 10x range offset, Channel B 1x range offset]
+
+    """
     handle.open()
     sendcmd(handle,'S O')
     retdata = handle.read(10)
@@ -303,18 +303,19 @@ def get_eeprom_offlist(handle):
     return declist
 
 
-
-# set_trig_samples(handle,trigdict)
-#
-# Sets the number of samples to take after a trigger.  The unit always
-# takes 1024 samples.  Setting the post-trigger samples to a value
-# less than 1024 means that samples before the trigger will be saved
-# instead.
-#
-# Arguments: 
-#   handle -- serial object representing the CGR-101
-#   trigdict -- see get_trig_dict function
 def set_trig_samples(handle,trigdict):
+    """Set the number of samples to take after a trigger.  
+
+    The unit always takes 1024 samples per channel.  Setting the
+    post-trigger samples to a value less than 1024 means that samples
+    before the trigger will also be stored.
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      trigdict -- Dictionary of trigger settings.  See get_trig_dict for
+                  more details. 
+
+    """
     handle.open()
     totsamp = 1024
     if (trigdict['trigpts'] <= totsamp):
@@ -326,19 +327,18 @@ def set_trig_samples(handle,trigdict):
     sendcmd(handle,('S C ' + str(setval_h) + ' ' + str(setval_l)))
     handle.close()
     
-# set_ctrl_reg( handle, fsamp, trigdict )
-#
-# Sets the CGR-101's control register.
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  fsamp_req -- requested sample rate in Hz.  The actual rate will be
-#               determined using those allowed for the unit.
-#  trigdict -- see get_trig_dict function
-#
-# Returns: 
-#   The new control register value
+
 def set_ctrl_reg(handle,fsamp_req,trigdict):
+    """ Sets the CGR-101's conrol register.
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      fsamp_req -- Requested sample rate in Hz.  The actual rate will
+                   be determined using those allowed for the unit.
+      trigdict -- Dictionary of trigger settings.  See get_trig_dict
+                  for more details.
+
+    """
     reg_value = 0
     [reg_value,fsamp_act] = get_samplebits(fsamp_req) # Set sample rate
     # Configure the trigger source
@@ -358,27 +358,19 @@ def set_ctrl_reg(handle,fsamp_req,trigdict):
     handle.close()
     return [reg_value,fsamp_act]
 
-# set_hw_gain( handle, gainlist)
-#
-# Sets the CGR-101's hardware gain.  I don't think there's actually a
-# switched voltage divider at the inputs.  Rather, I think this switch
-# just applies an extra gain factor to measurements.  This is useful
-# to accomodate things like scope probes.
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  gainlist -- [cha_gain, chb_gain]
-#
-#  ...where the gain values are:
-#  cha_gain -- Set the gain for channel A
-#              0: Set 1x gain
-#              1: Set 10x gain (for use with a 10x probe)
-#  chb_gain -- Set the gain for channel B
-#              0: Set 1x gain
-#              1: Set 10x gain (for use with a 10x probe)
-#
-# Returns the gainlist: [cha_gain, chb_gain]
+
 def set_hw_gain(handle,gainlist):
+    """Sets the CGR-101's hardware gain.
+
+    Arguments:
+      handle -- Serial object for the CGR-101.
+      gainlist -- [Channel A gain, Channel B gain]
+
+    ...where the gain values are:
+      0: Set 1x gain
+      1: Set 10x gain (for use with a 10x probe)
+    
+    """
     handle.open()
     if gainlist[0] == 0: # Set channel A gain to 1x
         sendcmd(handle,('S P A'))
@@ -391,22 +383,22 @@ def set_hw_gain(handle,gainlist):
     handle.close()
     return gainlist
 
-# get_trig_dict( trigsrc, triglev, trigpol, trigpts )
-#
-# Make a dictionary of trigger settings.
-#
-# Arguments:
-#  trigsrc -- Trigger source
-#             0: Channel A
-#             1: Channel B
-#             2: External
-#             3: Internal
-#  triglev -- Trigger voltage (floating point volts)
-#  trigpol -- Trigger slope
-#             0: Rising
-#             1: Falling
-#  trigpts -- Points to acquire after trigger (0 --> 1024)
+
 def get_trig_dict( trigsrc, triglev, trigpol, trigpts ):
+    """Return a dictionary of trigger settings.
+
+    Arguments:
+      trigsrc -- Trigger source
+                 0: Channel A
+                 1: Channel B
+                 2: External
+                 3: Internal
+      triglev -- Trigger voltage (floating point volts)
+      trigpol -- Trigger slope
+                 0: Rising
+                 1: Falling
+      trigpts -- Points to acquire after trigger (0,1,2,...,1024)
+    """
     trigdict = {}
     trigdict['trigsrc'] = trigsrc
     trigdict['triglev'] = triglev
@@ -414,18 +406,16 @@ def get_trig_dict( trigsrc, triglev, trigpol, trigpts ):
     trigdict['trigpts'] = trigpts
     return trigdict
 
-
-
-# set_trig_level( handle, caldict, gainlist, trigdict)
-#
-# Sets the trigger voltage.
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  caldict -- dictionary of slope and offset values
-#  gainlist -- [cha_gain, chb_gain]
-#  trigdict -- see get_trig_dict function
 def set_trig_level(handle, caldict, gainlist, trigdict):
+    """Sets the trigger voltage.
+
+    Arguements:
+      handle -- Serial object for the CGR-101
+      caldict -- Dictionary of slope and offset values
+      gainlist -- [Channel A gain, Channel B gain]
+      trigdict -- Dictionary of trigger settings.  See get_trig_dict
+                  for more details.
+    """
     handle.open()
     if (gainlist[0] == 0 and trigdict['trigsrc'] == 0): 
         # Channel A gain is 1x
@@ -451,17 +441,22 @@ def set_trig_level(handle, caldict, gainlist, trigdict):
     handle.close()
 
 
-
-# get_uncal_triggered_data(handle, trigdict)
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  trigdict -- dictionary of trigger settings
-# 
-# Returns 
-#  Uncalibrated integer data and the trigger position: 
-#  [ A channel data, B channel data]
 def get_uncal_triggered_data(handle, trigdict):
+    """Return uncalibrated integer data.
+
+    If you just ask the CGR for data, you'll get its circular buffer
+    with the last point acquired somewhere in the middle.  This
+    function rotates the buffer data so that the last point acquired
+    is the last point in the returned array.
+
+    Returned data is:
+      [ list of channel A integers, list of channel B integers ] 
+
+    Arguments:
+      handle -- Serial object for the CGR-101.
+      trigdict -- Dictionary of trigger settings (see get_trig_dict
+                  for more details.
+    """
     handle.open()
     sendcmd(handle,'S G') # Start the capture
     sys.stdout.write('Waiting for ' + 
@@ -501,25 +496,27 @@ def get_uncal_triggered_data(handle, trigdict):
     return [list(adecdata),list(bdecdata)]
 
 
-# reset( handle )
-# Perform a hardware reset
 def reset(handle):
+    """ Perform a hardware reset.
+    """
     handle.open()
     sendcmd(handle,('S D 1' )) # Force the reset
     sendcmd(handle,('S D 0' )) # Return to normal
     handle.close()
 
 
-# force_trigger( handle, ctrl_reg )
-#
-# Force a trigger.  Set bit 6 of the control register to configure
-# triggering via the external input, then send a debug code to force
-# the trigger.
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  ctrl_reg -- value of the control register
 def force_trigger(handle, ctrl_reg):
+    """Force a trigger.
+
+    This sets bit 6 of the control register to configure triggering
+    via the external input, then sends a debug code to force the
+    trigger.
+
+    Arguments:
+      handle -- Serial object for the CGR-101.
+      ctrl_reg -- Value of the control register.
+
+    """
     old_reg = ctrl_reg
     new_reg = ctrl_reg | (1 << 6)
     handle.open()
@@ -533,16 +530,17 @@ def force_trigger(handle, ctrl_reg):
     handle.close()
     
 
-# get_uncal_forced_data(handle, ctrl_reg)
-#
-# Arguments:
-#  handle -- serial object representing the CGR-101
-#  ctrl_reg -- value of the control register
-#            
-# Returns uncalibrated integer data from the unit.  Returns two lists
-# of data:
-# [ A channel data, B channel data]
 def get_uncal_forced_data(handle,ctrl_reg):
+    """ Returns uncalibrated data from the unit after a forced trigger.
+
+    Returned data is:
+      [ list of channel A integers, list of channel B integers ]
+
+    Arguments:
+      handle -- Serial object for the CGR-101.
+      ctrl_reg -- Value of the control register.
+
+    """
     force_trigger(handle, ctrl_reg)
     handle.open()
     sendcmd(handle,'S B') # Query the data
@@ -567,23 +565,18 @@ def get_uncal_forced_data(handle,ctrl_reg):
     bdecdata.rotate(1024-lastpoint)
     return [list(adecdata),list(bdecdata)]
 
-
-# get_cal_data(caldict,gainlist,rawdata)
-#
-# Convert raw data points to voltages.  Return the list of
-# voltages. The raw data list contains samples from both channels.
-#
-# Inputs:
-#     caldict: A dictionary of (calibration factor name) : values
-#     gainlist: List of gain settings -- [chA_gain, chB_gain]
-#     rawdata: 2D list of data downloaded from the CGR-101.
-#              [Channel A data, Channel B data]
-#
-# Returns:
-#     2D list of calibrated data in Volt units:  
-#     [Channel A data, Channel B data]
-#              
+        
 def get_cal_data(caldict,gainlist,rawdata):
+    """Return calibrated voltages.
+
+    Arguments:
+      caldict -- Dictionary of calibration constants.  See 
+                 caldict_default for the keys in this dictionary.
+      gainlist -- List of gain settings: 
+                 [Channel A gain, Channel B gain]
+      rawdata -- List of uncalibrated data downloaded from CGR-101:
+                 [Channel A data, Channel B data]
+    """
     if gainlist[0] == 0:
         # Channel A has 1x gain
         # Check for an outdated slope calibration

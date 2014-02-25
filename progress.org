@@ -4,6 +4,11 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgrlib
+** TODO Test storing and reading values from eeprom
+   - I need to make calibration less dependent on a calibration
+     file.  So I need to start using hardcoded slope values and
+     offset values stored in eeprom.  The CGR-101 manual suggests
+     that this is the right approach.
 ** TODO Get rid of message delay
    - Do this after testing various delays.  Realize that you'll never
      get much faster than 10ms of delay.
@@ -19,7 +24,12 @@
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
+** TODO What are good values for slope and offset?
 ** TODO Save data function should write timestamp to file
+** TODO Custom serial port list should be added to the config
+   - The config should have a connection section.  There should be a
+     list of custom serial ports, and there should be a lastport
+     variable.  This lastport variable will be written at runtime.
 ** DONE Write plotinit() function
    - Configures the plot, returns the plot object (gplot)
 ** DONE gplot object needs to be created in the main loop
@@ -41,13 +51,7 @@
      for a list of all calibration factors and their associated dates.
    - I started doing this with get_cal_data() from utils.py.  This
      needs to be extended to the remaining calibration factors.
-** TODO Custom serial port list should be added to the config
-   - The config should have a connection section.  There should be a
-     list of custom serial ports, and there should be a lastport
-     variable.  This lastport variable will be written at runtime.
 ** DONE Cal file should be set in the config file
-** TODO I should just be able to call cgr-capture
-   - Take a look at what pelican does to set this up.
 ** DONE One command-line argument should be init file
    - The default should be cgr-capture.cfg, but it should accept
      alternates.
