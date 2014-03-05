@@ -13,6 +13,7 @@
    - Do this after testing various delays.  Realize that you'll never
      get much faster than 10ms of delay.
 * setup.py script
+** TODO Where do the example scripts get copied upon install?
 ** DONE Check to see if dependencies actually get updated
    - They do!  You just don't see all the output from the setup.py script.
 ** DONE Restructure project to have a tools directory
@@ -94,4 +95,7 @@
      a better way is to only use the gain setting set in the config
      file.  
 * readme file
-** TODO Document how to fix gnuplot script
+** TODO Document how to set up gnuplot
+*** Installing gnuplot.py
+**** Using pip
+     - pip install gnuplot-py
