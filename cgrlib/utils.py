@@ -16,7 +16,7 @@ import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
 
 
-utilnum = 42
+utilnum = 46
 
 # create logger
 module_logger = logging.getLogger('root.utils')
@@ -69,22 +69,34 @@ def write_cal(calfile, caldict):
     """
     try:
         with open(calfile):
-            # If this succeeds, the file already exists.  Copy the
-            # existing file to an old version.
-            calfile_old = (calfile.split('.')[0] + '_old.' + 
-                           calfile.split('.')[1])
-            module_logger.info(
-                'Backing up calibration file ' + calfile + 
-                ' to ' + calfile_old
-            )
-            shutil.copyfile(calfile,(
-                calfile.split('.')[0] + '_old.' + calfile.split('.')[1]
-            ))
-            module_logger.info('Writing calibration to ' + calfile)
-            with open(calfile,'w') as fout:
-                pickle.dump(caldict,fout)
-                fout.close()
+            # If this succeeds, the file already exists.  See if
+            # anything has changed.
+            caldict_old = load_cal(calfile)
+            calchanged = False
+            for key in caldict:
+                if (caldict[key] != caldict_old[key]):
+                    calchanged = True
+                    module_logger.debug('Cal factor ' + key + ' has changed')
+                    module_logger.debug(str(caldict_old[key]) + ' --> ' +
+                                        str(caldict[key]))
+            if calchanged:
+                # The calibration has changed.  Back up the old
+                # calibration file and write a new one.
+                calfile_old = (calfile.split('.')[0] + '_old.' + 
+                               calfile.split('.')[1])
+                module_logger.info(
+                    'Backing up calibration file ' + calfile + 
+                    ' to ' + calfile_old
+                )
+                shutil.copyfile(calfile,(
+                    calfile.split('.')[0] + '_old.' + calfile.split('.')[1]
+                ))
+                module_logger.info('Writing calibration to ' + calfile)
+                with open(calfile,'w') as fout:
+                    pickle.dump(caldict,fout)
+                    fout.close()
     except IOError:
+        # The calfile doesn't exist, so write one.
         module_logger.info('Writing calibration to ' + calfile)
         with open(calfile,'w') as fout:
             pickle.dump(caldict,fout)
@@ -190,7 +202,7 @@ def sendcmd(handle,cmd):
     """
     handle.write(cmd + cmdterm)
     module_logger.debug('Sent command ' + cmd)
-    time.sleep(0.1) # Don't know if there's a command buffer
+    time.sleep(0.01) # Can't run at full speed.
 
 
 def get_samplebits(fsamp_req):

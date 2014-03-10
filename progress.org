@@ -4,11 +4,6 @@
 * <2013-11-17 Sun> Created this document
 * ----------------------------- TODO list ------------------------------
 * cgrlib
-** TODO Test storing and reading values from eeprom
-   - I need to make calibration less dependent on a calibration
-     file.  So I need to start using hardcoded slope values and
-     offset values stored in eeprom.  The CGR-101 manual suggests
-     that this is the right approach.
 ** TODO Get rid of message delay
    - Do this after testing various delays.  Realize that you'll never
      get much faster than 10ms of delay.
