@@ -226,9 +226,9 @@ def init_config(configFileName):
     config.comments['Inputs'] = [
         ' ',
         '-------------------- Input configuration ---------------------',  
-        'The unit is limited to measuring +/-25Vpp',
-        'at its inputs with the 1x probe setting, and at the end of a 10x',
-        'probe with the 10x probe setting.'
+        'The unit is limited to measuring +/-25Vpp at its inputs with',
+        'the 1x probe setting, and at the end of a 10x probe with the',
+        '10x probe setting.'
     ]
     # Probe setting
     config['Inputs']['Aprobe'] = 0

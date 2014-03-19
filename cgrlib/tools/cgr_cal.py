@@ -140,10 +140,30 @@ def init_config(configFileName):
         ' ']
     config.comments = {}
     config.inline_comments = {}
+    
+    #------------------------ Connection section ----------------------
+    config['Connection'] = {}
+    config['Connection'].comments = {}
+    config.comments['Connection'] = [
+        ' ',
+        '------------------ Connection configuration ------------------'
+    ]
+    config['Connection']['port'] = '/dev/ttyS0'
+    config['Connection'].comments['port'] = [
+        ' ',
+        'Manually set the connection port here.  This will be overwritten',
+        'by the most recent successful connection.  The software will try',
+        'to connect using the configuration port first, then it will move',
+        'on to automatically detected ports and some hardcoded values.'
+    ]
+
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
-    config.comments['Calibration'] = ['Calibration configuration']
+    config.comments['Calibration'] = [
+        ' ',
+        '----------------- Calibration configuration ------------------'
+    ]
     config['Calibration']['calfile'] = 'cgrcal.pkl'
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
@@ -156,16 +176,15 @@ def init_config(configFileName):
        'but we need a non-zero voltage to calibrate slope.'
        ]
 
-
-
     #-------------------------- Inputs section ------------------------
     config['Inputs'] = {}
     config['Inputs'].comments = {}
     config.comments['Inputs'] = [
         ' ',
-        'Input configuration.  The unit is limited to measuring +/-25Vpp',
-        'at its inputs with the 1x probe setting, and at the end of a 10x',
-        'probe with the 10x probe setting.',
+        '-------------------- Input configuration ---------------------',
+        'The unit is limited to measuring +/-25Vpp at its inputs with',
+        'the 1x probe setting, and at the end of a 10x probe with the',
+        '10x probe setting.',
         ' ',
         'Calibration coefficients will only be measured for the',
         'configuration specified here -- if you want to calibrate to',
@@ -187,7 +206,7 @@ def init_config(configFileName):
     config['Acquire'].comments = {}
     config.comments['Acquire'] = [
         ' ',
-        'Acquisition configuration.'
+        '----------------- Acquisition configuration ------------------'
     ]
     # Sample rate
     config['Acquire']['rate'] = 100000
@@ -437,7 +456,7 @@ def main():
     # calibration code.
     trigdict = utils.get_trig_dict(3,0,0,0)
 
-    cgr = utils.get_cgr() # Connect to the unit
+    cgr = utils.get_cgr(config) # Connect to the unit
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])

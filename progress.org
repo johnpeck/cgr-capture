@@ -2,11 +2,15 @@
 * cgrlib progress
 * ---------------------------- Dated notes -----------------------------
 * <2013-11-17 Sun> Created this document
+* <2014-03-19 Wed> A note about setuptools
+  - You can have weird installation errors if this isn't updated.  As
+    usual, use pip install --upgrage setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * cgrlib
-** TODO Get rid of message delay
+** DONE Get rid of message delay
    - Do this after testing various delays.  Realize that you'll never
      get much faster than 10ms of delay.
+   - This can't be done.  A message delay is necessary.
 * setup.py script
 ** TODO Where do the example scripts get copied upon install?
 ** DONE Check to see if dependencies actually get updated
@@ -20,7 +24,7 @@
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
-** TODO config object passed to utils get_cgr()
+** DONE config object passed to utils get_cgr()
 ** TODO What are good values for slope and offset?
 ** TODO Save data function should write timestamp to file
 ** DONE Custom serial port list should be added to the config
@@ -75,10 +79,10 @@
      the calibration coefficient is used, there should be a warning
      that the coefficient has never been updated from its default
      value.
-** TODO There should be a file to keep last port
+** DONE There should be a file to keep last port
    - Should have the last port connected to.  This could be something
      like cgr-session.pkl.
-** TODO Custom serial port list should be added to config
+** DONE Custom serial port list should be added to config
 ** DONE cal file should be set in config file
    - Right now it's specified in the utils.py file.  Its name is cgrcal.pkl.
 ** DONE utils.load_cal() should take a filename

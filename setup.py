@@ -24,6 +24,7 @@ setup(
         "gnuplot-py >= 1.8",
         "colorlog >= 2.0.0"
     ],
+    zip_safe = True,
     entry_points = entry_points,
     keywords = ['testing', 'logging', 'example'] # arbitrary keywords
 )
