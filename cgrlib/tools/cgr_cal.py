@@ -32,7 +32,7 @@ logger.setLevel(logging.DEBUG)
 # create console handler (ch) and set level
 # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.DEBUG)
 
 # create file handler and set level to debug
 fh = logging.FileHandler('cgrlog.log',mode='a',encoding=None,delay=False)
@@ -264,8 +264,8 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     gainlist = utils.set_hw_gain(handle,gainlist)
     try:
         raw_input(
-            '* Disconnect all inputs and press return,\n' +
-            '  or Control-C to skip offset calibration'
+            '* Disconnect all inputs and press return.\n' +
+            '  Control-C to skip offset calibration.'
         )
         for capturenum in range(int(config['Acquire']['averages'])):
             tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
@@ -330,8 +330,8 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
     try:
         raw_input(
             '* Connect ' + '{:0.3f}'.format(calvolt) +
-            'V calibration voltage and press return,\n' +
-            '  or Control-C to skip slope calibration'
+            'V calibration voltage and press return.\n' +
+            '  Control-C to skip slope calibration'
         )
         for capturenum in range(int(config['Acquire']['averages'])):
             tracedata = utils.get_uncal_forced_data(handle, ctrl_reg)
@@ -464,29 +464,8 @@ def main():
 
     # Start the slope calibration
     caldict = get_slopes(cgr, ctrl_reg, gainlist, caldict, config)
-
-    # Test calibration
-    raw_input('* Ready to test calibration...')
-    gplot = plotinit() # Create plot object
-    for capturenum in range(int(config['Acquire']['averages'])):
-        tracedata = utils.get_uncal_forced_data(cgr,ctrl_reg)
-        logger.info('Acquiring trace ' + str(capturenum + 1) + ' of ' +
-                    str(config['Acquire']['averages']))
-        if capturenum == 0:
-            sumdata = tracedata
-        else:
-            sumdata = add(sumdata,tracedata)
-        avgdata = divide(sumdata,float(capturenum +1))
-
-    # Get calibrated volts
-    voltdata = utils.get_cal_data(
-       caldict,gainlist,[avgdata[0],avgdata[1]]
-        )
-    timedata = utils.get_timelist(fsamp_act)
-    plotdata(gplot, timedata, voltdata, trigdict)
-    # Write the calibration data
     utils.write_cal(config['Calibration']['calfile'],caldict)
-    raw_input('Press any key to close plot and exit...')
+
 
 # Execute main() from command line
 if __name__ == '__main__':

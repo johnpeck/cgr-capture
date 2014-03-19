@@ -282,7 +282,7 @@ def plotinit():
     plotobj('set key bottom left')
     plotobj.xlabel('Time (s)')
     plotobj.ylabel('Voltage (V)')
-    plotobj("set yrange [*:*]")
+    plotobj("set autoscale y")
     plotobj("set format x '%0.0s %c'")
     plotobj('set pointsize 1')
     return plotobj
@@ -304,6 +304,9 @@ def plotdata(plotobj, timedata, voltdata, trigdict):
     gdata_chb = Gnuplot.PlotItems.Data(
         timedata,voltdata[1],title='Channel B')
     plotobj.plot(gdata_cha,gdata_chb) # Plot the data
+    # Freeze the axis limits after the initial autoscale.
+    plotobj('unset autoscale y')
+    plotobj('set yrange [GPVAL_Y_MIN:GPVAL_Y_MAX]')
     # Add the trigger crosshair
     if (trigdict['trigsrc'] < 3):
         trigtime = timedata[1024-trigdict['trigpts']]
