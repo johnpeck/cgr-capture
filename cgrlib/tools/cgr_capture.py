@@ -148,10 +148,29 @@ def init_config(configFileName):
         ' ']
     config.comments = {}
     config.inline_comments = {}
+    #------------------------ Connection section ----------------------
+    config['Connection'] = {}
+    config['Connection'].comments = {}
+    config.comments['Connection'] = [
+        ' ',
+        '------------------ Connection configuration ------------------'
+    ]
+    config['Connection']['port'] = '/dev/ttyS0'
+    config['Connection'].comments['port'] = [
+        ' ',
+        'Manually set the connection port here.  This will be overwritten',
+        'by the most recent successful connection.  The software will try',
+        'to connect using the configuration port first, then it will move',
+        'on to automatically detected ports and some hardcoded values.'
+    ]
+
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
-    config.comments['Calibration'] = ['Calibration configuration']
+    config.comments['Calibration'] = [
+        ' ',
+        '----------------- Calibration configuration ------------------'
+    ]
     config['Calibration']['calfile'] = 'cgrcal.pkl'
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
@@ -161,7 +180,10 @@ def init_config(configFileName):
     #------------------------- Trigger section ------------------------
     config['Trigger'] = {}
     config['Trigger'].comments = {}
-    config.comments['Trigger'] = ['The trigger section']
+    config.comments['Trigger'] = [
+        ' ',
+        '----------------- Trigger configuration ----------------------'
+    ]
     config['Trigger']['level'] = 1.025
     # config.inline_comments['Trigger'] = 'Inline comment about trigger section'
     config['Trigger'].comments['level'] = ['The trigger level (Volts)']
@@ -203,7 +225,8 @@ def init_config(configFileName):
     config['Inputs'].comments = {}
     config.comments['Inputs'] = [
         ' ',
-        'Input configuration.  The unit is limited to measuring +/-25Vpp',
+        '-------------------- Input configuration ---------------------',  
+        'The unit is limited to measuring +/-25Vpp',
         'at its inputs with the 1x probe setting, and at the end of a 10x',
         'probe with the 10x probe setting.'
     ]
@@ -222,7 +245,7 @@ def init_config(configFileName):
     config['Acquire'].comments = {}
     config.comments['Acquire'] = [
         ' ',
-        'Acquisition configuration.'
+        '----------------- Acquisition configuration ------------------'
     ]
     # Sample rate
     config['Acquire']['rate'] = 100000
@@ -335,7 +358,7 @@ def main():
                                      int(config['Trigger']['polarity']),
                                      int(config['Trigger']['points'])
     )
-    cgr = utils.get_cgr()
+    cgr = utils.get_cgr(config)
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])
@@ -349,7 +372,7 @@ def main():
         cgr, float(config['Acquire']['rate']), trigdict
     )
     if not (fsamp_act == float(config['Acquire']['rate'])):
-        logger.warning(
+        logger.warning( 
             'Requested sample frequency ' + '{:0.3f} kHz '.format(
                 float(config['Acquire']['rate'])/1000
             )

@@ -16,7 +16,7 @@ import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
 
 
-utilnum = 42
+utilnum = 43
 
 # create logger
 module_logger = logging.getLogger('root.utils')
@@ -119,9 +119,11 @@ def load_cal(calfile):
     return caldict
 
 
-def get_cgr():
+def get_cgr(config):
     """ Return a serial object for the cgr scope
 
+    Arguments:
+      config -- Configuration object read from configuration file.
     """
     # The comports() function returns an iterable that yields tuples of
     # three strings:
@@ -134,7 +136,10 @@ def get_cgr():
     portset.add(('/dev/ttyS0', 'ttyS0', 'n/a'))
     portset.add(('/dev/ttyS9', 'ttyS9', 'n/a'))
     portset.add(('/dev/ttyS3', 'ttyS3', 'n/a'))
-    portlist = list(portset) # set objects do not support indexing
+    # Add the port specified in the configuration to the front of the
+    # list.  We have to convert the set object to a list because set
+    # objects do not support indexing.
+    portlist = [(config['Connection']['port'],'','')] + list(portset)
 
     for serport in portlist:
         rawstr = ''
@@ -150,8 +155,12 @@ def get_cgr():
             rawstr = cgr.read(10) # Read a small number of bytes
             cgr.close()
             if rawstr.count('Syscomp') == 1:
+                # Success!  We found a CGR-101 unit!
                 module_logger.info('Connecting to CGR-101 at ' +
                                     str(serport[0]))
+                # Write the successful connection port to the configuration
+                config['Connection']['port'] = str(serport[0])
+                config.write()
                 return cgr
             else:
                 module_logger.info('Could not open ' + serport[0])
@@ -163,7 +172,6 @@ def get_cgr():
         # a serial port, and by problems caused by the node not existing.
         except (serial.serialutil.SerialException, OSError):
             module_logger.info('Could not open ' + serport[0])
-            portset.remove(serport)
             if serport == portlist[-1]: # This is the last port
                 module_logger.error('Did not find any CGR-101 units')
                 sys.exit()
