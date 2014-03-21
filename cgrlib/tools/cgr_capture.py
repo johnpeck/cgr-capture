@@ -362,6 +362,9 @@ def main():
                                      int(config['Trigger']['points'])
     )
     cgr = utils.get_cgr(config)
+    utils.set_eeprom_offlist(cgr,[-100,-100,-100,-100])
+    eeprom_list = utils.get_eeprom_offlist(cgr)
+    print('Offset list is ' + str(eeprom_list))
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])
@@ -375,7 +378,7 @@ def main():
         cgr, float(config['Acquire']['rate']), trigdict
     )
     if not (fsamp_act == float(config['Acquire']['rate'])):
-        logger.warning( 
+        logger.warning(
             'Requested sample frequency ' + '{:0.3f} kHz '.format(
                 float(config['Acquire']['rate'])/1000
             )

@@ -24,6 +24,8 @@
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
+** TODO Offset calibration values should be read out of eeprom
+   - Only if calibration file does not exist.
 ** DONE config object passed to utils get_cgr()
 ** TODO What are good values for slope and offset?
 ** TODO Save data function should write timestamp to file

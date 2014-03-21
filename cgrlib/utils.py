@@ -16,7 +16,7 @@ import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
 
 
-utilnum = 46
+utilnum = 47
 
 # create logger
 module_logger = logging.getLogger('root.utils')
@@ -176,7 +176,6 @@ def get_cgr(config):
                 return cgr
             else:
                 module_logger.info('Could not open ' + serport[0])
-                portset.remove(serport)
                 if serport == portlist[-1]: # This is the last port
                     module_logger.error('Did not find any CGR-101 units')
                     sys.exit()
@@ -321,6 +320,38 @@ def get_eeprom_offlist(handle):
             signed = unsigned
         declist.append(signed)
     return declist
+
+def set_eeprom_offlist(handle,offlist):
+    """Sets offsets in the CGR's eeprom.
+    
+    Arguments:
+      handle -- Serial object for the CGR-101
+      offlist -- List of signed 8-bit integers:
+
+    [Channel A 10x range offset, 
+     Channel A 1x range offset, 
+     Channel B 10x range offset, 
+     Channel B 1x range offset]
+  
+    """
+    unsigned_list = []
+    for offset in offlist:
+        if (offset < 0):
+            unsigned_list.append(offset + 256)
+        else:
+            unsigned_list.append(offset)
+    handle.open()
+    sendcmd(handle,('S F ' + 
+                    str(unsigned_list[0]) + ' ' +
+                    str(unsigned_list[1]) + ' ' +
+                    str(unsigned_list[2]) + ' ' +
+                    str(unsigned_list[3]) + ' '
+                    )
+        )
+    handle.close()
+                    
+                                 
+    
 
 
 def set_trig_samples(handle,trigdict):
