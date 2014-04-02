@@ -6,26 +6,12 @@
   - You can have weird installation errors if this isn't updated.  As
     usual, use pip install --upgrage setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
-* cgrlib
-** DONE Get rid of message delay
-   - Do this after testing various delays.  Realize that you'll never
-     get much faster than 10ms of delay.
-   - This can't be done.  A message delay is necessary.
-* setup.py script
-** TODO Where do the example scripts get copied upon install?
-** DONE Check to see if dependencies actually get updated
-   - They do!  You just don't see all the output from the setup.py script.
-** DONE Restructure project to have a tools directory
-   - The tools directory will have the cgr-capture and cgr-cal
-     scripts.  This will allow me to struture the project like
-     pelican, and use the console scripts method to create
-     executables.
-** TODO Store the version number in a better way
-   - I need to be able to print out the version number on the command line.
-   - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-capture script
 ** TODO Offset calibration values should be read out of eeprom
-   - Only if calibration file does not exist.
+   - Only if calibration file does not exist.  The cgr object needs
+     to be passed to the function that gets the calibration values.
+     And this function needs to fill in the default offsets in the
+     dictionary using values pulled from the device.
 ** DONE config object passed to utils get_cgr()
 ** TODO What are good values for slope and offset?
 ** TODO Save data function should write timestamp to file
@@ -59,7 +45,26 @@
    - The default should be cgr-capture.cfg, but it should accept
      alternates.
 ** DONE Check to see that averaging works
+* cgrlib
+** DONE Get rid of message delay
+   - Do this after testing various delays.  Realize that you'll never
+     get much faster than 10ms of delay.
+   - This can't be done.  A message delay is necessary.
+* setup.py script
+** TODO Where do the example scripts get copied upon install?
+   - They get copied to usr/bin
+** DONE Check to see if dependencies actually get updated
+   - They do!  You just don't see all the output from the setup.py script.
+** DONE Restructure project to have a tools directory
+   - The tools directory will have the cgr-capture and cgr-cal
+     scripts.  This will allow me to struture the project like
+     pelican, and use the console scripts method to create
+     executables.
+** TODO Store the version number in a better way
+   - I need to be able to print out the version number on the command line.
+   - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-cal script
+** TODO Offset values need to be written to both the file and eeprom
 ** TODO Test new cgr-cal with new plotting code
 ** DONE What is this output file?  
 ** DONE Add support for averaging while measuring slopes

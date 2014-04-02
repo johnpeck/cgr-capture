@@ -355,13 +355,13 @@ def savedata(config, timedata, voltdata):
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
-    caldict = utils.load_cal(config['Calibration']['calfile'])
     trigdict = utils.get_trig_dict( int(config['Trigger']['source']),
                                      float(config['Trigger']['level']),
                                      int(config['Trigger']['polarity']),
                                      int(config['Trigger']['points'])
     )
     cgr = utils.get_cgr(config)
+    caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
     utils.set_eeprom_offlist(cgr,[-100,-100,-100,-100])
     eeprom_list = utils.get_eeprom_offlist(cgr)
     print('Offset list is ' + str(eeprom_list))

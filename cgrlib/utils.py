@@ -103,10 +103,15 @@ def write_cal(calfile, caldict):
             fout.close()
         
 
-def load_cal(calfile):
-    """ Load and return calibration constant dictionary.
+def load_cal(handle, calfile):
+    """Load and return calibration constant dictionary.
+
+    If the calibration file exists, use the coefficients in it.  If it
+    doesn't, load calibration offsets from the CGR unit.  Use these
+    values in the caldict_default dictionary.
 
     Arguments:
+      handle -- Serial object for the CGR-101
       calfile -- Filename for calibration constants saved in Python's
                  pickle format.
 
@@ -124,6 +129,7 @@ def load_cal(calfile):
                 caldict[key] = caldict_default[key]
         fin.close()
     except IOError:
+        # We didn't find the calibration file.
         module_logger.warning(
             'Failed to open calibration file...using defaults'
         )
@@ -193,11 +199,13 @@ def get_cgr(config):
             print message
             sys.exit()
 
+
 def flush_cgr(handle):
     readstr = 'junk'
     while (len(readstr) > 0):
         readstr = handle.read(100)
         module_logger.info('Flushed ' + str(len(readstr)) + ' characters')
+
 
 def sendcmd(handle,cmd):
     """ Send an ascii command string to the CGR scope.
@@ -233,6 +241,7 @@ def get_samplebits(fsamp_req):
     fsamp_act = min(ratelist, key=lambda x:abs(x - fsamp_req))
     setval = ratelist.index(fsamp_act)
     return [setval,fsamp_act]
+
 
 def askcgr(handle,cmd):
     """Send an ascii command to the CGR scope and return its reply.
@@ -321,6 +330,7 @@ def get_eeprom_offlist(handle):
         declist.append(signed)
     return declist
 
+
 def set_eeprom_offlist(handle,offlist):
     """Sets offsets in the CGR's eeprom.
     
@@ -351,9 +361,6 @@ def set_eeprom_offlist(handle,offlist):
     handle.close()
                     
                                  
-    
-
-
 def set_trig_samples(handle,trigdict):
     """Set the number of samples to take after a trigger.  
 
@@ -456,6 +463,7 @@ def get_trig_dict( trigsrc, triglev, trigpol, trigpts ):
     trigdict['trigpol'] = trigpol
     trigdict['trigpts'] = trigpts
     return trigdict
+
 
 def set_trig_level(handle, caldict, gainlist, trigdict):
     """Sets the trigger voltage.
