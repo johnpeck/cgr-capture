@@ -28,33 +28,6 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
-
-""" Specify a default calibration dictionary.  
-
-This dictionary definition is also where all the calibration factors
-are defined.  If you want to add another factor, this is the place to
-do it.
-
-"""
-caldict_default = {'chA_1x_offset': 0,
-                   'chA_1x_offset_caldate': 'none',
-                   'chA_1x_slope': 0.0445,
-                   'chA_1x_slope_caldate': 'none',
-                   'chA_10x_offset': 0,
-                   'chA_10x_offset_caldate': 'none',
-                   'chA_10x_slope': 0.0445,
-                   'chA_10x_slope_caldate': 'none',
-                   'chB_1x_offset': 0,
-                   'chB_1x_offset_caldate': 'none',
-                   'chB_1x_slope': 0.0445,
-                   'chB_1x_slope_caldate': 'none',
-                   'chB_10x_offset': 0,
-                   'chB_10x_offset_caldate': 'none',
-                   'chB_10x_slope': 0.0445,
-                   'chB_10x_slope_caldate': 'none'
-}
-
-
 def write_cal(calfile, caldict):
     """Write calibration constants to a file.
 
@@ -102,6 +75,32 @@ def write_cal(calfile, caldict):
             pickle.dump(caldict,fout)
             fout.close()
         
+
+
+""" Specify a default calibration dictionary.  
+
+This dictionary definition is also where all the calibration factors
+are defined.  If you want to add another factor, this is the place to
+do it.
+
+"""
+caldict_default = {'chA_1x_offset': 0,
+                   'chA_1x_offset_caldate': 'none',
+                   'chA_1x_slope': 0.0445,
+                   'chA_1x_slope_caldate': 'none',
+                   'chA_10x_offset': 0,
+                   'chA_10x_offset_caldate': 'none',
+                   'chA_10x_slope': 0.0445,
+                   'chA_10x_slope_caldate': 'none',
+                   'chB_1x_offset': 0,
+                   'chB_1x_offset_caldate': 'none',
+                   'chB_1x_slope': 0.0445,
+                   'chB_1x_slope_caldate': 'none',
+                   'chB_10x_offset': 0,
+                   'chB_10x_offset_caldate': 'none',
+                   'chB_10x_slope': 0.0445,
+                   'chB_10x_slope_caldate': 'none'
+}
 
 def load_cal(handle, calfile):
     """Load and return calibration constant dictionary.

@@ -7,11 +7,19 @@
     usual, use pip install --upgrage setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * cgr-capture script
-** TODO Offset calibration values should be read out of eeprom
+** Offset calibration values should be read out of eeprom
    - Only if calibration file does not exist.  The cgr object needs
      to be passed to the function that gets the calibration values.
      And this function needs to fill in the default offsets in the
      dictionary using values pulled from the device.
+   - I realize that the offset value depends on the slope.  This is
+     necessary to have 511 counts be 0V.  But the slope value doesn't
+     usually need calibration.  The slope is 44.5 mV/count.  If I
+     store the calibration value as straight mV, I would divide by
+     44.5 before using the value in calculations.  Need to verify
+     what uncalibrated offsets are.
+*** TODO Decide how the offset number should be formatted
+    - The cgr stores offsets as 8-bit signed integers.  
 ** DONE config object passed to utils get_cgr()
 ** TODO What are good values for slope and offset?
 ** TODO Save data function should write timestamp to file
