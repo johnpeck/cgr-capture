@@ -54,6 +54,15 @@
      alternates.
 ** DONE Check to see that averaging works
 * cgrlib
+** Get rid of calibration dates
+   - The calibration dates made sense when we were just using a
+     calibration file, but not now that we've decided to pull
+     calibration factors out of eeprom.  We can not store calibration
+     dates in eeprom.
+*** TODO Get rid of caldate checks in utils.get_cal_data
+*** TODO Get rid of dates in utils.caldict_default
+*** TODO Don't set any caldates in cgr_cal.get_offsets
+*** TODO Don't set any caldates in cgr_cal.get_slopes
 ** DONE Get rid of message delay
    - Do this after testing various delays.  Realize that you'll never
      get much faster than 10ms of delay.
