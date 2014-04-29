@@ -85,21 +85,13 @@ do it.
 
 """
 caldict_default = {'chA_1x_offset': 0,
-                   'chA_1x_offset_caldate': 'none',
                    'chA_1x_slope': 0.0445,
-                   'chA_1x_slope_caldate': 'none',
                    'chA_10x_offset': 0,
-                   'chA_10x_offset_caldate': 'none',
                    'chA_10x_slope': 0.0445,
-                   'chA_10x_slope_caldate': 'none',
                    'chB_1x_offset': 0,
-                   'chB_1x_offset_caldate': 'none',
                    'chB_1x_slope': 0.0445,
-                   'chB_1x_slope_caldate': 'none',
                    'chB_10x_offset': 0,
-                   'chB_10x_offset_caldate': 'none',
                    'chB_10x_slope': 0.0445,
-                   'chB_10x_slope_caldate': 'none'
 }
 
 def load_cal(handle, calfile):
@@ -637,59 +629,19 @@ def get_cal_data(caldict,gainlist,rawdata):
     """
     if gainlist[0] == 0:
         # Channel A has 1x gain
-        # Check for an outdated slope calibration
-        if ((caldict['chA_1x_slope_caldate'] == 'none') or
-            ((caldict['chA_1x_slope_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel A 1x slope is out of date')
         chA_slope = caldict['chA_1x_slope']
-        # Check for an outdated offset calibration
-        if ((caldict['chA_1x_offset_caldate'] == 'none') or
-            ((caldict['chA_1x_offset_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel A 1x offset is out of date')
         chA_offset = caldict['chA_1x_offset']
     elif gainlist[0] == 1:
         # Channel A has 10x gain
-        # Check for an outdated slope calibration
-        if ((caldict['chA_10x_slope_caldate'] == 'none') or
-            ((caldict['chA_10x_slope_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel A 10x slope is out of date')
         chA_slope = caldict['chA_10x_slope']
-        # Check for an outdated offset calibration
-        if ((caldict['chA_10x_offset_caldate'] == 'none') or
-            ((caldict['chA_10x_offset_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel A 10x offset is out of date')
         chA_offset = caldict['chA_10x_offset']
     if gainlist[1] == 0:
         # Channel B has 1x gain
-        # Check for an outdated slope calibration
-        if ((caldict['chB_1x_slope_caldate'] == 'none') or
-            ((caldict['chB_1x_slope_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel B 1x slope is out of date')
         chB_slope = caldict['chB_1x_slope']
-        # Check for an outdated offset calibration
-        if ((caldict['chB_1x_offset_caldate'] == 'none') or
-            ((caldict['chB_1x_offset_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel B 1x offset is out of date')
         chB_offset = caldict['chB_1x_offset']
     elif gainlist[1] == 1:
         # Channel B has 10x gain
-        # Check for an outdated slope calibration
-        if ((caldict['chB_10x_slope_caldate'] == 'none') or
-            ((caldict['chB_10x_slope_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel B 10x slope is out of date')
         chB_slope = caldict['chB_10x_slope']
-        # Check for an outdated offset calibration
-        if ((caldict['chB_10x_offset_caldate'] == 'none') or
-            ((caldict['chB_10x_offset_caldate'] - 
-              datetime.now()).days >= 365)):
-            module_logger.warning('Channel B 10x offset is out of date')
         chB_offset = caldict['chB_10x_offset']
     # Process channel A data
     cha_voltdata = []

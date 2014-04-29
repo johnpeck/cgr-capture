@@ -301,22 +301,18 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
             logger.debug('Channel A offset set to ' +
                          str(offset_list[0]) + ' counts.')
             caldict['chA_1x_offset'] = offset_list[0]
-            caldict['chA_1x_offset_caldate'] = datetime.now()
         elif gainlist[0] == 1: # Channel A set for 10x gain
             logger.debug('Channel A offset set to ' +
                          str(offset_list[0]) + ' counts.')
             caldict['chA_10x_offset'] = offset_list[0]
-            caldict['chA_10x_offset_caldate'] = datetime.now()
         if gainlist[1] == 0: # Channel B set for 1x gain
             logger.debug('Channel B offset set to ' +
                          str(offset_list[1]) + ' counts.')
             caldict['chB_1x_offset'] = offset_list[1]
-            caldict['chB_1x_offset_caldate'] = datetime.now()
         elif gainlist[1] == 1: # Channel B set for 10x gain
             logger.debug('Channel B offset set to ' +
                         str(offset_list[1]) + ' counts.')
             caldict['chB_10x_offset'] = offset_list[1]
-            caldict['chB_10x_offset_caldate'] = datetime.now()
     except KeyboardInterrupt:
         print(' ')
         logger.info('Offset calibration skipped')
@@ -370,28 +366,24 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                          ' millivolts per count.'
             )
             caldict['chA_1x_slope'] = slope_list[0]
-            caldict['chA_1x_slope_caldate'] = datetime.now()
         elif gainlist[0] == 1: # Channel A set for 10x gain
             logger.debug('Channel A 10x slope set to ' +
                          '{:0.1f}'.format(1000 * slope_list[0]) +
                          ' millivolts per count.'
             )
-            caldict['chA_10x_slope'] = slope_list[0]
-            caldict['chA_10x_slope_caldate'] = datetime.now()
+            caldict['chA_10x_slope'] = slope_list[
         if gainlist[1] == 0: # Channel B set for 1x gain
             logger.debug('Channel B 1x slope set to ' +
                          '{:0.1f}'.format(1000 * slope_list[1]) +
                          ' millivolts per count.'
             )
             caldict['chB_1x_slope'] = slope_list[1]
-            caldict['chB_1x_slope_caldate'] = datetime.now()
         elif gainlist[1] == 1: # Channel B set for 10x gain
             logger.debug('Channel B 10x slope set to ' +
                          '{:0.1f}'.format(1000 * slope_list[1]) +
                          ' millivolts per count.'
             )
             caldict['chB_10x_slope'] = slope_list[1]
-            caldict['chB_10x_slope_caldate'] = datetime.now()
     except KeyboardInterrupt:
         print(' ')
         logger.info('Slope calibration skipped')
