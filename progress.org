@@ -7,9 +7,9 @@
     usual, use pip install --upgrage setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * howto
-** TODO Set up the howto document
-   - Set it up like boxcom's
 ** TODO Document how to set up the logger
+** DONE Set up the howto document
+   - Set it up like boxcom's
 * cgr-capture script
 ** Offset calibration values should be read out of eeprom
    - Only if calibration file does not exist.  The cgr object needs
