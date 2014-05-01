@@ -1,7 +1,7 @@
-% Main latex file for the boxcom howto.
+% Main latex file for the cgrlib howto.
 
 % The left footer on the normal pagestyle pages
-\newcommand{\normalleftfoot}{\textsl{Boxcom howto}}
+\newcommand{\normalleftfoot}{\textsl{cgrlib howto}}
 
 % The right footer on the normal pagestyle pages
 \newcommand{\normalrightfoot}{\today}
@@ -32,8 +32,8 @@
 % These commands cause  usr_commands.idx and srs_commands.idx to be
 % generated when latex is run on this file and the multind.sty file
 % is pulled in (by manual_template)
-\makeindex{user_cmds_index}
-\makeindex{internal_cmds_index}
+%% \makeindex{user_cmds_index}
+%% \makeindex{internal_cmds_index}
 
 \begin{document}
 
@@ -44,7 +44,7 @@
 \thispagestyle{empty}   % First page does not need headers and footers
 \vspace*{\fill}
 \begin{center}
-{\huge boxcom howto}\\
+{\huge cgrlib howto}\\
 \today
 \end{center}
 \vspace*{\fill}
@@ -59,53 +59,13 @@
 \pagestyle{normal} % Set the normal page style
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The USB board
+% The logger
 %
 % Subsections:
 % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{usb_board}
+\include{logger}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The Butterfly board
-%
-% Subsections:
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{bfly_board}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Firmware
-%
-% Subsections:
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{firmware}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calibration
-%
-% Subsections:
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{calibration}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% User commands
-%
-% Subsections:
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{user_commands}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Internal commands
-%
-% Subsections:
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{internal_commands}
 
 
 %--------------------------------------------------------------------
@@ -179,12 +139,12 @@
 
 
 % Alphabetical command index
-\printindex{user_cmds_index}{Alphabetical command index}
+% \printindex{user_cmds_index}{Alphabetical command index}
 
 %Internal SRS commands
 \ifthenelse{\equal{\isforme}{1}}{
 \clearpage{}
-\printindex{internal_cmds_index}{Internal command index}
+% \printindex{internal_cmds_index}{Internal command index}
 }{}
 
 
