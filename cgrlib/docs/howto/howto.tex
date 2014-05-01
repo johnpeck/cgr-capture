@@ -1,0 +1,192 @@
+% Main latex file for the boxcom howto.
+
+% The left footer on the normal pagestyle pages
+\newcommand{\normalleftfoot}{\textsl{Boxcom howto}}
+
+% The right footer on the normal pagestyle pages
+\newcommand{\normalrightfoot}{\today}
+
+
+% The manual_template controls page layout and things like the logo
+% in each page footer.
+\input{doctools/latex/manual_template.tex}  
+\input{doctools/latex/mycommands.tex} % Some useful commands
+\input{doctools/latex/units.tex} % Macros for pretty measurement units
+
+% Some text is inserted in drafts that shouldn't be in the released
+% version.  For example, some figures have their filenames printed in
+% the draft version.  See the \draftnote command in mycommands to
+% insert text like this.
+\newcommand{\isdraft}{1} % Choose 1 for draft, 0 for release
+
+% isforme
+% Choose 1 for in-house use, 0 for outside.  The in-house manual
+% will contain the dollar-sign calibration commands
+\newcommand{\isforme}{1} % Choose 1 for internal, 0 for outside
+
+% Figure search path
+\graphicspath{
+              {figs/} % Figures drawn with xfig
+              }
+
+% These commands cause  usr_commands.idx and srs_commands.idx to be
+% generated when latex is run on this file and the multind.sty file
+% is pulled in (by manual_template)
+\makeindex{user_cmds_index}
+\makeindex{internal_cmds_index}
+
+\begin{document}
+
+
+%\doublespacing %set double spacing
+
+% Title page
+\thispagestyle{empty}   % First page does not need headers and footers
+\vspace*{\fill}
+\begin{center}
+{\huge boxcom howto}\\
+\today
+\end{center}
+\vspace*{\fill}
+\clearpage
+
+
+% Table of contents page
+\pagestyle{toc} % Set the toc page style
+\tableofcontents{}
+\clearpage{}    % There must be a \clearpage to end a page style
+
+\pagestyle{normal} % Set the normal page style
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The USB board
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{usb_board}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The Butterfly board
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{bfly_board}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Firmware
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{firmware}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calibration
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{calibration}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% User commands
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{user_commands}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Internal commands
+%
+% Subsections:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{internal_commands}
+
+
+%--------------------------------------------------------------------
+% Bibliography
+%
+% 
+%--------------------------------------------------------------------
+\clearpage
+% \addcontentsline{toc}{section}{Bibliography}
+% \pagestyle{references} %set the references page style
+% \bibliography{doctools/latex/ecrefs.bib}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Everything below here goes in the appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Indexes
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+% Redefine the printindex command to format the index in multiple columns.
+% Uses the multicol package.  
+% Don't try to use column separators (lines) -- there's still something
+% strange going on with column widths.
+%
+% printindex still takes two arguments:
+% 1. The ind file containing the index entries
+% 2. The name for the index (will appear in the table of contents and at the
+%    top of the index page.
+\renewcommand{\printindex}[2]{
+  % The \endtheindex command redefined by multind confounds the multicol
+  % environment.  Redefine it to do nothing.  
+  \renewcommand{\endtheindex}{}
+  \addcontentsline{toc}{section}{#2}
+  % Ideally, printindex would take an argument for the number of columns
+  % instead of just hard coding it.
+  \begin{multicols}{4}
+    [\section*{#2}]
+    \input{#1.ind}
+  \end{multicols}
+}% end printindex
+
+
+
+
+
+% Alphabetical command index
+\printindex{user_cmds_index}{Alphabetical command index}
+
+%Internal SRS commands
+\ifthenelse{\equal{\isforme}{1}}{
+\clearpage{}
+\printindex{internal_cmds_index}{Internal command index}
+}{}
+
+
+
+\end{document}
