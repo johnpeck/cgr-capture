@@ -143,8 +143,16 @@ def get_cgr(config):
     portset = set(comports()) # Use set to prevent repeats
     # Add undetectable serial ports here
     portset.add(('/dev/ttyS0', 'ttyS0', 'n/a'))
-    portset.add(('/dev/ttyS9', 'ttyS9', 'n/a'))
+    portset.add(('/dev/ttyS1', 'ttyS1', 'n/a'))
+    portset.add(('/dev/ttyS2', 'ttyS2', 'n/a'))
     portset.add(('/dev/ttyS3', 'ttyS3', 'n/a'))
+    portset.add(('/dev/ttyS4', 'ttyS4', 'n/a'))
+    portset.add(('/dev/ttyS5', 'ttyS5', 'n/a'))
+    portset.add(('/dev/ttyS6', 'ttyS6', 'n/a'))
+    portset.add(('/dev/ttyS7', 'ttyS7', 'n/a'))
+    portset.add(('/dev/ttyS8', 'ttyS8', 'n/a'))
+    portset.add(('/dev/ttyS9', 'ttyS9', 'n/a'))
+    
     # Add the port specified in the configuration to the front of the
     # list.  We have to convert the set object to a list because set
     # objects do not support indexing.
@@ -208,7 +216,7 @@ def sendcmd(handle,cmd):
     """
     handle.write(cmd + cmdterm)
     module_logger.debug('Sent command ' + cmd)
-    time.sleep(0.01) # Can't run at full speed.
+    time.sleep(0.1) # Can't run at full speed.
 
 
 def get_samplebits(fsamp_req):

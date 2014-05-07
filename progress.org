@@ -4,7 +4,7 @@
 * <2013-11-17 Sun> Created this document
 * <2014-03-19 Wed> A note about setuptools
   - You can have weird installation errors if this isn't updated.  As
-    usual, use pip install --upgrage setuptools to get it up to date.
+    usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * howto
 ** TODO Document how to set up the logger
@@ -26,6 +26,11 @@
     - The cgr stores offsets as 8-bit signed integers.  
 ** DONE config object passed to utils get_cgr()
 ** TODO What are good values for slope and offset?
+   - I'm looking at an offset value of about 513 mV.  This is 11.3
+     counts.  Let's say that the offset will be less than 1V, or 22
+     counts.  I could either have the offset stored as half-counts,
+     or as centivolts.  I like centivolts.  Of course, if the user
+     actually calibrates, they'll get more precision.
 ** TODO Save data function should write timestamp to file
 ** DONE Custom serial port list should be added to the config
    - The config should have a connection section.  There should be a

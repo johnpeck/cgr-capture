@@ -371,7 +371,7 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                          '{:0.1f}'.format(1000 * slope_list[0]) +
                          ' millivolts per count.'
             )
-            caldict['chA_10x_slope'] = slope_list[
+            caldict['chA_10x_slope'] = slope_list[0]
         if gainlist[1] == 0: # Channel B set for 1x gain
             logger.debug('Channel B 1x slope set to ' +
                          '{:0.1f}'.format(1000 * slope_list[1]) +
@@ -442,13 +442,13 @@ def plotdata(plotobj, timedata, voltdata, trigdict):
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
-    caldict = utils.load_cal(config['Calibration']['calfile'])
 
+    cgr = utils.get_cgr(config) # Connect to the unit
+
+    caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
     # Trigger is hard coded to internal (auto trigger) for the
     # calibration code.
     trigdict = utils.get_trig_dict(3,0,0,0)
-
-    cgr = utils.get_cgr(config) # Connect to the unit
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])
