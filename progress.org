@@ -28,9 +28,10 @@
 ** TODO What are good values for slope and offset?
    - I'm looking at an offset value of about 513 mV.  This is 11.3
      counts.  Let's say that the offset will be less than 1V, or 22
-     counts.  I could either have the offset stored as half-counts,
-     or as centivolts.  I like centivolts.  Of course, if the user
-     actually calibrates, they'll get more precision.
+     counts.  I could either have the offset stored as fifth-counts,
+     or as centivolts.  Of course, if the user actually calibrates,
+     they'll get more precision.  I like fifthcounts, since then I
+     don't have to keep the slope around.
 ** TODO Save data function should write timestamp to file
 ** DONE Custom serial port list should be added to the config
    - The config should have a connection section.  There should be a
@@ -90,7 +91,17 @@
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
 * cgr-cal script
-** TODO Offset values need to be written to both the file and eeprom
+** Offset values need to be written to both the file and eeprom
+   - Do this by adding fields to the caldict.  I can add the fields
+     chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
+*** TODO get_offsets in cgr_cal needs to add eeprom dict items
+*** TODO write_cal in utils needs to write eeprom values
+*** TODO load_cal in utils needs to read eeprom and store values
+    - The exception is thrown when the calibration file can't be
+      found.  We should read the eeprom values in the exception.
+      Assign the eeprom values to the appropriate "live" keys in the
+      calibraton dictionary -- the 1x_offset and 10x_offset slots.
+      These are actually used to correct data.
 ** TODO Test new cgr-cal with new plotting code
 ** DONE What is this output file?  
 ** DONE Add support for averaging while measuring slopes

@@ -77,20 +77,27 @@ def write_cal(calfile, caldict):
         
 
 
-""" Specify a default calibration dictionary.  
+"""Specify a default calibration dictionary.  
 
 This dictionary definition is also where all the calibration factors
 are defined.  If you want to add another factor, this is the place to
 do it.
 
+eeprom values are offsets to be stored in eeprom.  Values are
+fifth-counts, so a value of +6 corresponds to an offset of 1.2 counts.
+
 """
 caldict_default = {'chA_1x_offset': 0,
+                   'chA_1x_eeprom': 0,
                    'chA_1x_slope': 0.0445,
                    'chA_10x_offset': 0,
+                   'chA_10x_eeprom':0,
                    'chA_10x_slope': 0.0445,
                    'chB_1x_offset': 0,
+                   'chB_1x_eeprom': 0,
                    'chB_1x_slope': 0.0445,
                    'chB_10x_offset': 0,
+                   'chB_10x_eeprom': 0,
                    'chB_10x_slope': 0.0445,
 }
 

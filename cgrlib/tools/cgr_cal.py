@@ -261,7 +261,7 @@ def get_offcal_data(caldict, gainlist, rawdata):
 
 
 def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
-    """ Measure and record voltage offset coefficients.
+    """Measure and record voltage offset coefficients.
 
     Inputs:
         handle -- serial object representing the CGR-101
@@ -275,9 +275,14 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
     ...so offsets are calculated with:
         offset = 511 - rawdata
 
+    Offsets for eeprom can't have decimals, so I use fifth-counts.
+    This means that if I need an offset of 1.2 counts, I'll store a 6
+    in eeprom.
+
     Returns:
         caldict: The calibration factor dictionary with the relevant
                  offset factors filled in.
+
     """
     offset_list = []
     gainlist = utils.set_hw_gain(handle,gainlist)
