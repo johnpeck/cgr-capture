@@ -94,7 +94,7 @@
 ** Offset values need to be written to both the file and eeprom
    - Do this by adding fields to the caldict.  I can add the fields
      chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
-*** TODO get_offsets in cgr_cal needs to add eeprom dict items
+*** DONE get_offsets in cgr_cal needs to add eeprom dict items
 *** TODO write_cal in utils needs to write eeprom values
 *** TODO load_cal in utils needs to read eeprom and store values
     - The exception is thrown when the calibration file can't be

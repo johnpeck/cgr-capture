@@ -28,14 +28,15 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
-def write_cal(calfile, caldict):
-    """Write calibration constants to a file.
+def write_cal(handle, calfile, caldict):
+    """Write calibration constants to a file and to the eeprom.
 
     See the caldict_default definition for the list of dictionary
     entries.  If the specified calfile exists, it will be saved as
     calfile_old and a new calfile will be written.
 
     Arguments:
+      handle -- Serial object for the CGR-101
       calfile -- Filename for saving calibration constants.
       caldict -- A dictionary of (calibration factor names) : values
 
@@ -44,7 +45,7 @@ def write_cal(calfile, caldict):
         with open(calfile):
             # If this succeeds, the file already exists.  See if
             # anything has changed.
-            caldict_old = load_cal(calfile)
+            caldict_old = load_cal(handle, calfile)
             calchanged = False
             for key in caldict:
                 if (caldict[key] != caldict_old[key]):
