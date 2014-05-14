@@ -28,6 +28,20 @@ from serial.tools.list_ports import comports
 
 cmdterm = '\r\n' # Terminates each command
 
+def int8_to_dec(signed):
+    """Return a signed decimal number given a signed 8-bit integer
+
+    Arguments:
+      signed -- Signed 8-bit integer (0-255)
+    
+    """
+    if (signed > 127):
+        decimal = signed - 256
+    else:
+        decimal = signed
+    return decimal
+    
+
 def write_cal(handle, calfile, caldict):
     """Write calibration constants to a file and to the eeprom.
 
@@ -75,6 +89,12 @@ def write_cal(handle, calfile, caldict):
         with open(calfile,'w') as fout:
             pickle.dump(caldict,fout)
             fout.close()
+    # Write eeprom values
+    set_eeprom_offlist(handle,
+                       [caldict['chA_10x_eeprom'],caldict['chA_1x_eeprom'],
+                        caldict['chB_10x_eeprom'],caldict['chB_1x_eeprom']]
+                       )
+                       
         
 
 
@@ -116,6 +136,7 @@ def load_cal(handle, calfile):
 
     """
     try:
+        # Try loading the calibration file
         module_logger.info('Loading calibration file ' + calfile)
         fin = open(calfile,'rb')
         caldict = pickle.load(fin)
@@ -128,11 +149,17 @@ def load_cal(handle, calfile):
                 caldict[key] = caldict_default[key]
         fin.close()
     except IOError:
-        # We didn't find the calibration file.
+        # We didn't find the calibration file.  Load constants from eeprom.
         module_logger.warning(
             'Failed to open calibration file...using defaults'
         )
+        eeprom_list = get_eeprom_offlist(handle)
         caldict = caldict_default
+        # Fill in offsets from eeprom values
+        caldict['chA_10x_offset'] = int8_to_dec(eeprom_list[0])/5.0
+        caldict['chA_1x_offset'] = int8_to_dec(eeprom_list[1])/5.0
+        caldict['chB_10x_offset'] = int8_to_dec(eeprom_list[2])/5.0
+        caldict['chB_1x_offset'] = int8_to_dec(eeprom_list[3])/5.0
     return caldict
 
 
@@ -358,13 +385,21 @@ def set_eeprom_offlist(handle,offlist):
         else:
             unsigned_list.append(offset)
     handle.open()
+    module_logger.debug('Writing chA 10x offset of ' + str(unsigned_list[0]) +
+                        ' to eeprom')
+    module_logger.debug('Writing chA 1x offset of ' + str(unsigned_list[1]) +
+                        ' to eeprom')
+    module_logger.debug('Writing chB 10x offset of ' + str(unsigned_list[2]) +
+                        ' to eeprom')
+    module_logger.debug('Writing chB 1x offset of ' + str(unsigned_list[3]) +
+                        ' to eeprom')
     sendcmd(handle,('S F ' + 
                     str(unsigned_list[0]) + ' ' +
                     str(unsigned_list[1]) + ' ' +
                     str(unsigned_list[2]) + ' ' +
                     str(unsigned_list[3]) + ' '
-                    )
-        )
+                )
+    )
     handle.close()
                     
                                  

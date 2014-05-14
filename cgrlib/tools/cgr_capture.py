@@ -362,7 +362,6 @@ def main():
     )
     cgr = utils.get_cgr(config)
     caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
-    utils.set_eeprom_offlist(cgr,[-100,-100,-100,-100])
     eeprom_list = utils.get_eeprom_offlist(cgr)
     print('Offset list is ' + str(eeprom_list))
     gainlist = utils.set_hw_gain(

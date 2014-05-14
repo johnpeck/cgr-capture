@@ -6,6 +6,56 @@
   - You can have weird installation errors if this isn't updated.  As
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
+* cgr-cal script
+** Offset values need to be written to both the file and eeprom
+   - Do this by adding fields to the caldict.  I can add the fields
+     chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
+*** TODO This 5x factor for eeprom offsets needs a name
+    - Replace all these hardcoded values
+*** DONE get_offsets in cgr_cal needs to add eeprom dict items
+*** DONE write_cal in utils needs to write eeprom values
+*** DONE load_cal in utils needs to read eeprom and store values
+    - The exception is thrown when the calibration file can't be
+      found.  We should read the eeprom values in the exception.
+      Assign the eeprom values to the appropriate "live" keys in the
+      calibraton dictionary -- the 1x_offset and 10x_offset slots.
+      These are actually used to correct data.
+** DONE Test new cgr-cal with new plotting code
+** DONE What is this output file?  
+** DONE Add support for averaging while measuring slopes
+** DONE Add makefile to automate install and reindent steps
+   - This will give me a place to write comments about the reindent
+     and installation scripts.  As long as the makefile isn't in the
+     manifest, it won't be added to the package.
+** TODO Add checks for slope and offset values
+   - Offset counts should be within 10 counts of zero, and offsets
+     should be within 10% of 45mV / count.  Fail the calibration and
+     don't write any calibration factors if this happens.
+** DONE Add way to escape offset calibration
+** DONE Config file should specify which voltage to ask for
+** DONE Calibration dates need to be added to caldict
+   - caldict members _caldate should be added for each calibration
+     coefficient.  For example, since there's a chA_1x_offset member,
+     there should be a chA_1x_offset_caldate member.  If the member
+     has never been calibrated, the caldate should be 'none'.  When
+     the calibration coefficient is used, there should be a warning
+     that the coefficient has never been updated from its default
+     value.
+** DONE There should be a file to keep last port
+   - Should have the last port connected to.  This could be something
+     like cgr-session.pkl.
+** DONE Custom serial port list should be added to config
+** DONE cal file should be set in config file
+   - Right now it's specified in the utils.py file.  Its name is cgrcal.pkl.
+** DONE utils.load_cal() should take a filename
+** DONE trigdict needs to be set manually for calibration
+   - Trigger source needs to be manual, and points needs to be set to
+     whatever -- 500.  This should be pulled out of the configuration
+     file.
+** DONE get_offsets function should just get offsets specified by cfg
+   - Right now the function runs through both gain settings.  I think
+     a better way is to only use the gain setting set in the config
+     file.  
 * howto
 ** TODO Document how to set up the logger
 ** DONE Set up the howto document
@@ -64,6 +114,12 @@
      alternates.
 ** DONE Check to see that averaging works
 * cgrlib
+** Write checks for slope and offset values in utils
+*** TODO Write offset_ok function
+    - Returns True if offset within OK range
+*** TODO Write slope_ok function
+    - Returns True if slope within certain limits
+*** TODO Implement checks in cgr_cal get_offsets and get_slopes
 ** Get rid of calibration dates
    - The calibration dates made sense when we were just using a
      calibration file, but not now that we've decided to pull
@@ -90,54 +146,6 @@
 ** TODO Store the version number in a better way
    - I need to be able to print out the version number on the command line.
    - The fix may be here: http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
-* cgr-cal script
-** Offset values need to be written to both the file and eeprom
-   - Do this by adding fields to the caldict.  I can add the fields
-     chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
-*** DONE get_offsets in cgr_cal needs to add eeprom dict items
-*** TODO write_cal in utils needs to write eeprom values
-*** TODO load_cal in utils needs to read eeprom and store values
-    - The exception is thrown when the calibration file can't be
-      found.  We should read the eeprom values in the exception.
-      Assign the eeprom values to the appropriate "live" keys in the
-      calibraton dictionary -- the 1x_offset and 10x_offset slots.
-      These are actually used to correct data.
-** TODO Test new cgr-cal with new plotting code
-** DONE What is this output file?  
-** DONE Add support for averaging while measuring slopes
-** DONE Add makefile to automate install and reindent steps
-   - This will give me a place to write comments about the reindent
-     and installation scripts.  As long as the makefile isn't in the
-     manifest, it won't be added to the package.
-** TODO Add checks for slope and offset values
-   - Offset counts should be within 10 counts of zero, and offsets
-     should be within 10% of 45mV / count.  Fail the calibration and
-     don't write any calibration factors if this happens.
-** DONE Add way to escape offset calibration
-** DONE Config file should specify which voltage to ask for
-** DONE Calibration dates need to be added to caldict
-   - caldict members _caldate should be added for each calibration
-     coefficient.  For example, since there's a chA_1x_offset member,
-     there should be a chA_1x_offset_caldate member.  If the member
-     has never been calibrated, the caldate should be 'none'.  When
-     the calibration coefficient is used, there should be a warning
-     that the coefficient has never been updated from its default
-     value.
-** DONE There should be a file to keep last port
-   - Should have the last port connected to.  This could be something
-     like cgr-session.pkl.
-** DONE Custom serial port list should be added to config
-** DONE cal file should be set in config file
-   - Right now it's specified in the utils.py file.  Its name is cgrcal.pkl.
-** DONE utils.load_cal() should take a filename
-** DONE trigdict needs to be set manually for calibration
-   - Trigger source needs to be manual, and points needs to be set to
-     whatever -- 500.  This should be pulled out of the configuration
-     file.
-** DONE get_offsets function should just get offsets specified by cfg
-   - Right now the function runs through both gain settings.  I think
-     a better way is to only use the gain setting set in the config
-     file.  
 * readme file
 ** TODO Document how to set up gnuplot
 *** Installing gnuplot.py
