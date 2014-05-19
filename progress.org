@@ -7,10 +7,16 @@
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * cgr-cal script
+** TODO Add checks for slope and offset values
+   - Offset counts should be within 20 counts of zero, and offsets
+     should be within 10% of 45mV / count.  Fail the calibration and
+     don't write any calibration factors if this happens.  These
+     checks should be added in cgr_cal in get_offsets and
+     get_slopes.  
 ** Offset values need to be written to both the file and eeprom
    - Do this by adding fields to the caldict.  I can add the fields
      chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
-*** TODO This 5x factor for eeprom offsets needs a name
+*** DONE This 5x factor for eeprom offsets needs a name
     - Replace all these hardcoded values
 *** DONE get_offsets in cgr_cal needs to add eeprom dict items
 *** DONE write_cal in utils needs to write eeprom values
@@ -27,10 +33,6 @@
    - This will give me a place to write comments about the reindent
      and installation scripts.  As long as the makefile isn't in the
      manifest, it won't be added to the package.
-** TODO Add checks for slope and offset values
-   - Offset counts should be within 10 counts of zero, and offsets
-     should be within 10% of 45mV / count.  Fail the calibration and
-     don't write any calibration factors if this happens.
 ** DONE Add way to escape offset calibration
 ** DONE Config file should specify which voltage to ask for
 ** DONE Calibration dates need to be added to caldict

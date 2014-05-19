@@ -90,10 +90,11 @@ def write_cal(handle, calfile, caldict):
             pickle.dump(caldict,fout)
             fout.close()
     # Write eeprom values
-    set_eeprom_offlist(handle,
-                       [caldict['chA_10x_eeprom'],caldict['chA_1x_eeprom'],
-                        caldict['chB_10x_eeprom'],caldict['chB_1x_eeprom']]
-                       )
+    set_eeprom_offlist(
+        handle,
+        [caldict['chA_10x_eeprom'],caldict['chA_1x_eeprom'],
+         caldict['chB_10x_eeprom'],caldict['chB_1x_eeprom']]
+    )
                        
         
 
@@ -104,22 +105,26 @@ This dictionary definition is also where all the calibration factors
 are defined.  If you want to add another factor, this is the place to
 do it.
 
-eeprom values are offsets to be stored in eeprom.  Values are
-fifth-counts, so a value of +6 corresponds to an offset of 1.2 counts.
+eeprom values are offsets to be stored in eeprom.  Values are scaled
+from their file-based values by the eeprom_scaler factor.  If you
+change this factor, you must remove the pickled calibration file and
+recalibrate.
 
 """
-caldict_default = {'chA_1x_offset': 0,
-                   'chA_1x_eeprom': 0,
-                   'chA_1x_slope': 0.0445,
-                   'chA_10x_offset': 0,
-                   'chA_10x_eeprom':0,
-                   'chA_10x_slope': 0.0445,
-                   'chB_1x_offset': 0,
-                   'chB_1x_eeprom': 0,
-                   'chB_1x_slope': 0.0445,
-                   'chB_10x_offset': 0,
-                   'chB_10x_eeprom': 0,
-                   'chB_10x_slope': 0.0445,
+caldict_default = {
+    'eeprom_scaler': 5.0,
+    'chA_1x_offset': 0,
+    'chA_1x_eeprom': 0,
+    'chA_1x_slope': 0.0445,
+    'chA_10x_offset': 0,
+    'chA_10x_eeprom':0,
+    'chA_10x_slope': 0.0445,
+    'chB_1x_offset': 0,
+    'chB_1x_eeprom': 0,
+    'chB_1x_slope': 0.0445,
+    'chB_10x_offset': 0,
+    'chB_10x_eeprom': 0,
+    'chB_10x_slope': 0.0445,
 }
 
 def load_cal(handle, calfile):
@@ -156,10 +161,18 @@ def load_cal(handle, calfile):
         eeprom_list = get_eeprom_offlist(handle)
         caldict = caldict_default
         # Fill in offsets from eeprom values
-        caldict['chA_10x_offset'] = int8_to_dec(eeprom_list[0])/5.0
-        caldict['chA_1x_offset'] = int8_to_dec(eeprom_list[1])/5.0
-        caldict['chB_10x_offset'] = int8_to_dec(eeprom_list[2])/5.0
-        caldict['chB_1x_offset'] = int8_to_dec(eeprom_list[3])/5.0
+        caldict['chA_10x_offset'] = int8_to_dec(
+            eeprom_list[0]/caldict['eeprom_scaler']
+        )
+        caldict['chA_1x_offset'] = int8_to_dec(
+            eeprom_list[1]/caldict['eeprom_scaler']
+        )
+        caldict['chB_10x_offset'] = int8_to_dec(
+            eeprom_list[2]/caldict['eeprom_scaler']
+        )
+        caldict['chB_1x_offset'] = int8_to_dec(
+            eeprom_list[3]/caldict['eeprom_scaler']
+        )
     return caldict
 
 
@@ -348,7 +361,6 @@ def get_eeprom_offlist(handle):
     retdata = handle.read(10)
     handle.close()
     hexdata = binascii.hexlify(retdata)[2:]
-    print(hexdata)
     cha_hioff = int(hexdata[0:2],16)
     cha_looff = int(hexdata[2:4],16)
     chb_hioff = int(hexdata[4:6],16)

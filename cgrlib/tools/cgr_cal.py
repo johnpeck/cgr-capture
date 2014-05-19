@@ -306,28 +306,32 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
             caldict['chA_1x_offset'] = offset_list[0]
             logger.debug('Channel A file offset set to ' +
                          str(caldict['chA_1x_offset']) + ' counts.')
-            caldict['chA_1x_eeprom'] = int(round(5.0 * offset_list[0]))
+            caldict['chA_1x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                                                 offset_list[0]))
             logger.debug('Channel A eeprom offset set to ' +
                          str(caldict['chA_1x_eeprom']) + ' counts.')
         elif gainlist[0] == 1: # Channel A set for 10x gain
             caldict['chA_10x_offset'] = offset_list[0]
             logger.debug('Channel A file offset set to ' +
                          str(caldict['chA_10x_offset']) + ' counts.')
-            caldict['chA_10x_eeprom'] = int(round(5.0 * offset_list[0]))
+            caldict['chA_10x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                                                  offset_list[0]))
             logger.debug('Channel A eeprom offset set to ' +
                          str(caldict['chA_10x_eeprom']) + ' counts.')
         if gainlist[1] == 0: # Channel B set for 1x gain
             caldict['chB_1x_offset'] = offset_list[1]
             logger.debug('Channel B file offset set to ' +
                          str(caldict['chB_1x_offset']) + ' counts.')
-            caldict['chB_1x_eeprom'] = int(round(5.0 * offset_list[1]))
+            caldict['chB_1x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                                                 offset_list[1]))
             logger.debug('Channel B eeprom offset set to ' +
                          str(caldict['chB_1x_eeprom']) + ' counts.')
         elif gainlist[1] == 1: # Channel B set for 10x gain
             caldict['chB_10x_offset'] = offset_list[1]
             logger.debug('Channel B file offset set to ' +
                          str(caldict['chB_10x_offset']) + ' counts.')
-            caldict['chB_10x_eeprom'] = int(round(5.0 * offset_list[1]))
+            caldict['chB_10x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                                                  offset_list[1]))
             logger.debug('Channel B eeprom offset set to ' +
                          str(caldict['chB_10x_eeprom']) + ' counts.')
     except KeyboardInterrupt:
