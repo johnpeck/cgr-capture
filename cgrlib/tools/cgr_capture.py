@@ -163,7 +163,26 @@ def init_config(configFileName):
         'to connect using the configuration port first, then it will move',
         'on to automatically detected ports and some hardcoded values.'
     ]
-
+    #------------------------- Logging section ------------------------
+    config['Logging'] = {}
+    config['Logging'].comments = {}
+    config.comments['Logging'] = [
+        ' ',
+        '------------------- Logging configuration --------------------'
+    ]
+    config['Logging']['termlevel'] = 'debug'
+    config['Logging'].comments['termlevel'] = [
+        ' ',
+        'Set the logging level for the terminal.  Levels:',
+        'debug, info, warning, error, critical'
+        ]
+    config['Logging']['filelevel'] = 'debug'
+    config['Logging'].comments['filelevel'] = [
+        ' ',
+        'Set the logging level for the logfile.  Levels:',
+        'debug, info, warning, error, critical'
+        ]
+    
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
@@ -272,6 +291,22 @@ def init_config(configFileName):
     config.write()
     return config
 
+def init_logger(config,conhandler,filehandler):
+    """ Returns the configured console and file logging handlers
+
+    Arguments:
+      config -- The configuration file object
+      conhandler -- The console logging handler
+      filehandler -- The file logging handler
+    """
+    if config['Logger']['termlevel'] == 'debug':
+        conhandler.setLevel(logging.DEBUG)
+    elif config['Logger']['termlevel'] == 'info':
+        conhandler.setLevel(Logging.INFO)
+    elif config['Logger']['termlevel'] == 'warning':
+        conhandler.setLevel(Logging.WARNING)
+    return (conhandler,filehandler)
+
 def plotinit():
     """ Returns the configured gnuplot plot object.
     """
@@ -355,6 +390,7 @@ def savedata(config, timedata, voltdata):
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
+    (ch,fh) = init_logger(config,ch,fh)
     trigdict = utils.get_trig_dict( int(config['Trigger']['source']),
                                      float(config['Trigger']['level']),
                                      int(config['Trigger']['polarity']),
