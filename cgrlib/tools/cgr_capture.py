@@ -299,12 +299,12 @@ def init_logger(config,conhandler,filehandler):
       conhandler -- The console logging handler
       filehandler -- The file logging handler
     """
-    if config['Logger']['termlevel'] == 'debug':
+    if config['Logging']['termlevel'] == 'debug':
         conhandler.setLevel(logging.DEBUG)
-    elif config['Logger']['termlevel'] == 'info':
-        conhandler.setLevel(Logging.INFO)
-    elif config['Logger']['termlevel'] == 'warning':
-        conhandler.setLevel(Logging.WARNING)
+    elif config['Logging']['termlevel'] == 'info':
+        conhandler.setLevel(logging.INFO)
+    elif config['Logging']['termlevel'] == 'warning':
+        conhandler.setLevel(logging.WARNING)
     return (conhandler,filehandler)
 
 def plotinit():
@@ -390,6 +390,9 @@ def savedata(config, timedata, voltdata):
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
+    global ch,fh # Need to modify console and file logger handlers
+                 # with the config file, from inside main().  They
+                 # thus must be made global.
     (ch,fh) = init_logger(config,ch,fh)
     trigdict = utils.get_trig_dict( int(config['Trigger']['source']),
                                      float(config['Trigger']['level']),

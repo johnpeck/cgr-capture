@@ -9,8 +9,10 @@ from datetime import datetime # For finding calibration time differences
 import binascii # For hex string conversion
 import pickle # For writing and reading calibration data
 import sys # For sys.exit()
+import os # For diagnosing exceptions
 import collections # For rotatable lists
 import shutil # For copying files
+import termios # For catching termios exceptions
 
 import ConfigParser # For writing and reading the config file
 from configobj import ConfigObj # For writing and reading config file
@@ -213,6 +215,7 @@ def get_cgr(config):
             cgr.baudrate = 230400
             cgr.timeout = 0.1 # Set timeout to 100ms
             cgr.port = serport[0]
+            module_logger.debug('Trying to connect to CGR-101 at ' + serport[0])
             cgr.open()
             # If the port can be configured, it might be a CGR.  Check
             # to make sure.
@@ -230,20 +233,27 @@ def get_cgr(config):
             else:
                 module_logger.info('Could not open ' + serport[0])
                 if serport == portlist[-1]: # This is the last port
-                    module_logger.error('Did not find any CGR-101 units')
+                    module_logger.error(
+                        'Did not find any CGR-101 units.  Exiting.'
+                    )
                     sys.exit()
         # Catch exceptions caused by problems opening a filesystem node as
-        # a serial port, and by problems caused by the node not existing.
-        except (serial.serialutil.SerialException, OSError):
-            module_logger.info('Could not open ' + serport[0])
+        # a serial port, by problems caused by the node not existing, and
+        # general tty problems.
+        except (serial.serialutil.SerialException, 
+                OSError, termios.error):
+            module_logger.debug('Could not open ' + serport[0])
             if serport == portlist[-1]: # This is the last port
-                module_logger.error('Did not find any CGR-101 units')
+                module_logger.error(
+                    'Did not find any CGR-101 units.  Exiting.'
+                )
                 sys.exit()
         # This exception should never get handled.  It's just for debugging.
         except Exception as ex:
-            template = "An exception of type {0} occured. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            print message
+            template = "An exception of type: {0} occured. Arguments:\n{1!r}"
+            message = template.format((type(ex).__module__ + '.' + 
+                                       type(ex).__name__), ex.args)
+            module_logger.error(message)
             sys.exit()
 
 
