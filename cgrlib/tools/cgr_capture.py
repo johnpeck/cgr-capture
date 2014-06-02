@@ -402,13 +402,11 @@ def main():
     cgr = utils.get_cgr(config)
     caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
     eeprom_list = utils.get_eeprom_offlist(cgr)
-    print('Offset list is ' + str(eeprom_list))
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])
           ]
     )
-    # sys.exit() # For running without cgr
 
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)

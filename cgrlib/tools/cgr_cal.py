@@ -157,6 +157,26 @@ def init_config(configFileName):
         'on to automatically detected ports and some hardcoded values.'
     ]
 
+    #------------------------- Logging section ------------------------
+    config['Logging'] = {}
+    config['Logging'].comments = {}
+    config.comments['Logging'] = [
+        ' ',
+        '------------------- Logging configuration --------------------'
+    ]
+    config['Logging']['termlevel'] = 'debug'
+    config['Logging'].comments['termlevel'] = [
+        ' ',
+        'Set the logging level for the terminal.  Levels:',
+        'debug, info, warning, error, critical'
+        ]
+    config['Logging']['filelevel'] = 'debug'
+    config['Logging'].comments['filelevel'] = [
+        ' ',
+        'Set the logging level for the logfile.  Levels:',
+        'debug, info, warning, error, critical'
+        ]
+
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
@@ -410,6 +430,21 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
         logger.info('Slope calibration skipped')
     return caldict
 
+def init_logger(config,conhandler,filehandler):
+    """ Returns the configured console and file logging handlers
+
+    Arguments:
+      config -- The configuration file object
+      conhandler -- The console logging handler
+      filehandler -- The file logging handler
+    """
+    if config['Logging']['termlevel'] == 'debug':
+        conhandler.setLevel(logging.DEBUG)
+    elif config['Logging']['termlevel'] == 'info':
+        conhandler.setLevel(logging.INFO)
+    elif config['Logging']['termlevel'] == 'warning':
+        conhandler.setLevel(logging.WARNING)
+    return (conhandler,filehandler)
 
 
 def plotinit():
@@ -463,13 +498,15 @@ def plotdata(plotobj, timedata, voltdata, trigdict):
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
     config = load_config(args.rcfile)
-
-    cgr = utils.get_cgr(config) # Connect to the unit
-
-    caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
+    global ch,fh # Need to modify console and file logger handlers
+                 # with the config file, from inside main().  They
+                 # thus must be made global.
+    (ch,fh) = init_logger(config,ch,fh)
     # Trigger is hard coded to internal (auto trigger) for the
     # calibration code.
     trigdict = utils.get_trig_dict(3,0,0,0)
+    cgr = utils.get_cgr(config) # Connect to the unit
+    caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
     gainlist = utils.set_hw_gain(
         cgr, [int(config['Inputs']['Aprobe']),
               int(config['Inputs']['Bprobe'])

@@ -11,6 +11,8 @@ help:
 	@echo 'Makefile for cgrlib                                             '
 	@echo '                                                                '
 	@echo 'Usage:                                                          '
+	@echo '   make register     Register project with pypi                 '
+	@echo '   make upload       Upload project to pypi                     '
 	@echo '   make install      (as root) install the library              '
 	@echo '   make indent       Properly indent python code                '
 	@echo '                                                                '
@@ -20,6 +22,16 @@ help:
 .PHONY : install
 install :
 	python setup.py install
+
+# Register the project with pypi
+.PHONY : register
+register :
+	python setup.py register
+	
+# Upload the project to pypi
+.PHONY : upload
+upload :
+	python setup.py sdist upload
 
 
 # Change Python (.py) files to use 4-space indents and no hard tab
