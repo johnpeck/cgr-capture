@@ -14,7 +14,7 @@
    3. Run make upload
 ** Upload to github
 * makefile
-** TODO Add target to upload to pypi
+** DONE Add target to upload to pypi
    - I have a username and password already.  I created a pypirc file
      on my work machine.  I added a makefile target to register the
      package...I just don't have a decent connection to do it with.
@@ -171,6 +171,9 @@
      get much faster than 10ms of delay.
    - This can't be done.  A message delay is necessary.
 * setup.py script
+** TODO Set up vagrant to test installations
+*** TODO Install virtualbox
+*** TODO Install vagrant
 ** DONE Where do the example scripts get copied upon install?
    - They get copied to usr/bin
 ** DONE Check to see if dependencies actually get updated
