@@ -6,6 +6,13 @@
   - You can have weird installation errors if this isn't updated.  As
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
+* How to increment a revision
+** Increment the version number in setup.py
+** Test version
+   1. Run make install
+   2. Run cgr-capture in an empty directory.  Should fail gracefully.
+   3. Run make upload
+** Upload to github
 * makefile
 ** TODO Add target to upload to pypi
    - I have a username and password already.  I created a pypirc file
