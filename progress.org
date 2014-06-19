@@ -7,6 +7,9 @@
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
 * How to increment a revision
+** Merge with master
+   1. git checkout master
+   2. git merge feature
 ** Increment the version number in setup.py
 ** Test version
    1. Run make install
