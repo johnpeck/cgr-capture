@@ -22,14 +22,14 @@
      on my work machine.  I added a makefile target to register the
      package...I just don't have a decent connection to do it with.
 * cgr-cal script
+** DONE Add checks for slope and offset values
+   - Offset counts should be within 1V of zero, and offsets should be
+     within 10% of 45mV / count.  Fail the calibration and don't write
+     any calibration factors if this happens.  These checks should be
+     added in cgr_cal in get_offsets and get_slopes.
+   - Merge feature branch with master when you're done
 ** DONE Configure logging via the configuration file
    - See cgr_capture for how to do this.
-** TODO Add checks for slope and offset values
-   - Offset counts should be within 20 counts of zero, and offsets
-     should be within 10% of 45mV / count.  Fail the calibration and
-     don't write any calibration factors if this happens.  These
-     checks should be added in cgr_cal in get_offsets and
-     get_slopes.  
 ** DONE Offset values need to be written to both the file and eeprom
    - Do this by adding fields to the caldict.  I can add the fields
      chA_1x_eeprom, chA_10x_eeprom, chB_1x_eeprom, chB_10x_eeprom.
@@ -75,6 +75,79 @@
    - Right now the function runs through both gain settings.  I think
      a better way is to only use the gain setting set in the config
      file.  
+* Installing with cygwin
+** Windows 7 -- 32bit
+*** Download cygwin setup executable
+    - Download setup-x86.exe from http://cygwin.com/ (download it
+      instead of just running it -- you'll want to run it multiple
+      times).  I tested this with setup.exe version 2.850 (32 bit).
+*** Follow instructions to install from internet
+    - Install to C:\cygwin for all users
+    - Download installation files to C:\cygstore (this doesn't really matter).
+    - Use the https://cygwin.com/mirrors.html site to choose a mirror
+      near you.
+*** Install default packages, plus the following
+    1. gnuplot
+    2. python (2.7 branch)
+    3. python-numpy (this shouldn't have to be installed with the
+       package manager -- it should be able to be pulled in with the
+       package requirements.  But gnuplot-py requires it and doesn't
+       pull it in itself.)
+    4. lapack (same note as for numpy)
+    5. liblapack-devel
+    6. xorg-server
+    7. xinit
+    8. xorg-docs
+*** Start the cygwin terminal
+    - This creates your home directory and some useful configuration
+      files.
+*** Create a .startxwinrc file
+    - touch ~/.startxwinrc
+    - Suppresses the creation of an xterm on startup
+*** Edit the .bashrc file to set the display
+    - echo 'export DISPLAY=:0' >> ~/.bashrc
+*** Re-read the .bashrc file
+    - bash
+*** Install pip
+    1. Download get-pip.py from
+       http://pip.readthedocs.org/en/latest/installing.html.  Save it
+       to C:\cygwin\usr\get-pip.py
+    2. cd /usr
+    3. python get-pip.py
+*** Repair numpy
+    - See http://centilemma.com/windows/cygwin.html for more details.
+    1. cp /usr/lib/lapack/cygblas-0.dll /usr/bin
+    2. cp /usr/lib/lapack/cyglapack-0.dll /usr/bin
+    3. cygcheck
+       /lib/python2.7/site-packages/numpy/linalg/lapack_lite.dll (to
+       check on the success.  There should be no errors like:
+       cygcheck: track_down: could not find cyglapack-0.dll)
+    - A note about cygcheck.  Use cygcheck to show the installed
+      version of a package and to verify its integrity.
+*** Install gnuplot-py
+    - This is a bad system right now.
+    - pip install --allow-external gnuplot-py --allow-unverified
+      gnuplot-py gnuplot-py
+*** Install cgrlib
+    - pip install cgrlib
+*** Start X
+    - startxwin
+*** Try capturing a waveform
+    - cgr-capture
+* How to increment a revision
+** Merge with master
+
+** Increment the version number in setup.py
+** Test version
+   1. Run make install
+   2. Run cgr-capture in an empty directory.  Should fail gracefully.
+   3. Run make upload
+** Upload to github
+* makefile
+** DONE Add target to upload to pypi
+   - I have a username and password already.  I created a pypirc file
+     on my work machine.  I added a makefile target to register the
+     package...I just don't have a decent connection to do it with.
 * cgr-capture script
 ** DONE Configure logging via the configuration file
    - This is a bit of a problem, since the logger is a global
