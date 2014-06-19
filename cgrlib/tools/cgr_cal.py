@@ -450,7 +450,6 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                              '{:0.1f}'.format(1000 * caldict['chA_1x_slope']) +
                              ' millivolts per count.'
                 )
-                caldict['chA_1x_slope'] = slope_list[0]
             else:
                 # The slope exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
@@ -460,23 +459,53 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                              ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
                              ' mV of 45 mV per count.  Ignoring measurement.')
         elif gainlist[0] == 1: # Channel A set for 10x gain
-            logger.debug('Channel A 10x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[0]) +
-                         ' millivolts per count.'
-            )
-            caldict['chA_10x_slope'] = slope_list[0]
+            if ((slope_list[0] > (0.045 - slopemax)) and 
+                (slope_list[0] < (0.045 + slopemax))):
+                caldict['chA_10x_slope'] = slope_list[0]
+                logger.debug('Channel A 10x slope set to ' +
+                             '{:0.1f}'.format(1000 * caldict['chA_10x_slope']) +
+                             ' millivolts per count.'
+                )
+            else:
+                # The slope exceeds the allowed range -- there's
+                # probably something wrong.  Don't write this
+                # calibration value.
+                logger.error('Measured channel A slope of ' + 
+                             '{:0.2f}'.format(slope_list[0]) +
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' mV of 45 mV per count.  Ignoring measurement.')
         if gainlist[1] == 0: # Channel B set for 1x gain
-            logger.debug('Channel B 1x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[1]) +
-                         ' millivolts per count.'
-            )
-            caldict['chB_1x_slope'] = slope_list[1]
+            if ((slope_list[1] > (0.045 - slopemax)) and 
+                (slope_list[1] < (0.045 + slopemax))):
+                caldict['chB_1x_slope'] = slope_list[1]
+                logger.debug('Channel B 1x slope set to ' +
+                             '{:0.1f}'.format(1000 * caldict['chB_1x_slope']) +
+                             ' millivolts per count.'
+                )
+            else:
+                # The slope exceeds the allowed range -- there's
+                # probably something wrong.  Don't write this
+                # calibration value.
+                logger.error('Measured channel B slope of ' + 
+                             '{:0.2f}'.format(slope_list[1]) +
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' mV of 45 mV per count.  Ignoring measurement.')
         elif gainlist[1] == 1: # Channel B set for 10x gain
-            logger.debug('Channel B 10x slope set to ' +
-                         '{:0.1f}'.format(1000 * slope_list[1]) +
-                         ' millivolts per count.'
-            )
-            caldict['chB_10x_slope'] = slope_list[1]
+            if ((slope_list[1] > (0.045 - slopemax)) and 
+                (slope_list[1] < (0.045 + slopemax))):
+                caldict['chB_10x_slope'] = slope_list[1]
+                logger.debug('Channel B 10x slope set to ' +
+                             '{:0.1f}'.format(1000 * caldict['chB_10x_slope']) +
+                             ' millivolts per count.'
+                )
+            else:
+                # The slope exceeds the allowed range -- there's
+                # probably something wrong.  Don't write this
+                # calibration value.
+                logger.error('Measured channel B slope of ' + 
+                             '{:0.2f}'.format(slope_list[1]) +
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' mV of 45 mV per count.  Ignoring measurement.')
     except KeyboardInterrupt:
         print(' ')
         logger.info('Slope calibration skipped')
