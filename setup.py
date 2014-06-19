@@ -12,7 +12,7 @@ entry_points = {
 setup(
     name = 'cgrlib',
     packages = ['cgrlib','cgrlib.tools','cgrlib.test'],
-    version = '0.1.1',
+    version = '0.1.2',
     license='LICENSE.txt',
     description = 'Capture waveforms with the CGR-101 USB oscilloscope',
     author = 'John Peck',
