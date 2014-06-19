@@ -9,8 +9,9 @@
 * Installing with cygwin
 ** Windows 7 -- 32bit
 *** Download cygwin setup executable
-    - Download setup-x86.exe from http://cygwin.com/.  I tested this
-      with setup.exe version 2.850 (32 bit).
+    - Download setup-x86.exe from http://cygwin.com/ (download it
+      instead of just running it -- you'll want to run it multiple
+      times).  I tested this with setup.exe version 2.850 (32 bit).
 *** Follow instructions to install from internet
     - Install to C:\cygwin for all users
     - Download installation files to C:\cygstore (this doesn't really matter).
@@ -36,6 +37,8 @@
     - Suppresses the creation of an xterm on startup
 *** Edit the .bashrc file to set the display
     - echo 'export DISPLAY=:0' >> ~/.bashrc
+*** Re-read the .bashrc file
+    - bash
 *** Install pip
     1. Download get-pip.py from
        http://pip.readthedocs.org/en/latest/installing.html.  Save it
@@ -43,12 +46,15 @@
     2. cd /usr
     3. python get-pip.py
 *** Repair numpy
+    - See http://centilemma.com/windows/cygwin.html for more details.
     1. cp /usr/lib/lapack/cygblas-0.dll /usr/bin
     2. cp /usr/lib/lapack/cyglapack-0.dll /usr/bin
     3. cygcheck
        /lib/python2.7/site-packages/numpy/linalg/lapack_lite.dll (to
        check on the success.  There should be no errors like:
        cygcheck: track_down: could not find cyglapack-0.dll)
+    - A note about cygcheck.  Use cygcheck to show the installed
+      version of a package and to verify its integrity.
 *** Install gnuplot-py
     - This is a bad system right now.
     - pip install --allow-external gnuplot-py --allow-unverified
@@ -57,6 +63,8 @@
     - pip install cgrlib
 *** Start X
     - startxwin
+*** Try capturing a waveform
+    - cgr-capture
 * How to increment a revision
 ** Increment the version number in setup.py
 ** Test version
