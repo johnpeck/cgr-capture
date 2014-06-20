@@ -134,6 +134,18 @@
     - startxwin
 *** Try capturing a waveform
     - cgr-capture
+* Installing for linux
+** Mint14
+   - First install python-pip using apt-get.  Then it might be that I
+     can just install python-dev, then run pip install cgrlib.  I'm
+     not sure if I can get away with not installing numpy separately.
+     I suspect gnuplot-py is missing a dependency.  There is a
+     problem with python's six package on Mint...I may need to add
+     this six version 1.7.2 as a dependency.  I'd have to go back and
+     try the cygwin install if I change this.
+*** Add user to serial port group (where user is mint)
+    - usermod -a -G dialout mint
+    - logout and log back in (I had to do ctrl-alt-backspace)
 * How to increment a revision
 ** Merge with master
 
