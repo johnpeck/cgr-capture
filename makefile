@@ -15,6 +15,7 @@ help:
 	@echo '   make upload       Upload project to pypi                     '
 	@echo '   make install      (as root) install the library              '
 	@echo '   make indent       Properly indent python code                '
+	@echo '   make toc          Make table of contents for README          '
 	@echo '                                                                '
 
 
@@ -27,7 +28,7 @@ install :
 .PHONY : register
 register :
 	python setup.py register
-	
+
 # Upload the project to pypi
 .PHONY : upload
 upload :

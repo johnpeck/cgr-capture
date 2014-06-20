@@ -1,3 +1,13 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [cgrlib](#cgrlib)
+  - [Installation](#installation)
+    - [For Windows with Cygwin](#for-windows-with-cygwin)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # cgrlib #
 
 cgrlib provides functions for taking data with the CGR-101 USB
