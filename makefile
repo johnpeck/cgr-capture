@@ -34,6 +34,11 @@ register :
 upload :
 	python setup.py sdist upload
 
+# Generate a table of contents for the README file
+.PHONY : toc
+toc :
+	doctoc README.markdown
+
 
 # Change Python (.py) files to use 4-space indents and no hard tab
 # characters. Also trim excess spaces and tabs from ends of lines, and

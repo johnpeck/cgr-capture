@@ -14,6 +14,8 @@ cgrlib provides functions for taking data with the CGR-101 USB
 oscilloscope from
 [Syscomp Electronic Design](http://www.syscompdesign.com).
 
+![Alt text](/../screenshots/test.gif?raw=true "Optional Title")
+
 ## Installation ##
 
 ### For Windows with Cygwin ###
