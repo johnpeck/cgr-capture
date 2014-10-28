@@ -42,6 +42,30 @@ def int8_to_dec(signed):
     else:
         decimal = signed
     return decimal
+
+def get_phasestr(frequency):
+    """Return a string of four 8-bit numbers used to set the waveform
+       output frequency
+
+    Arguments:
+      frequency -- Floating point frequency in Hz
+
+    The function generator has a frequency resolution of 0.09313225746
+    Hz.
+
+    """
+    fres = 0.09313225746 # Frequency resolution (Hz)
+    pval = int(frequency/fres)
+    fthree = int(pval/(2**24))
+    ftwo = int((pval%(2**24))/(2**16))
+    fone = int((pval%(2**16))/(2**8))
+    fzero = int((pval%(2**8))) 
+    retstr = (str(fthree) + ' ' +
+              str(ftwo) + ' ' +
+              str(fone) + ' ' +
+              str(fzero)
+    )
+    return(retstr) 
     
 
 def write_cal(handle, calfile, caldict):

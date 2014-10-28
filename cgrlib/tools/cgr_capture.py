@@ -2,7 +2,7 @@
 
 # cgr_capture.py
 #
-# Captures one buffer of data from the cgr-101 USB scope
+# Captures one buffer of data from the cgr-101 USB oscilloscope
 
 import time     # For making pauses
 import os       # For basic file I/O
@@ -110,8 +110,6 @@ cmdterm = '\r\n' # Terminates each command
 # ------------- Configure runtime configuration file ------------------
 from configobj import ConfigObj # For writing and reading config file
 
-
-# ---------- Done with configuring runtime configuration --------------
 
 # load_config(configuration file name)
 #
@@ -290,6 +288,9 @@ def init_config(configFileName):
                  configFileName)
     config.write()
     return config
+
+# ---------- Done with configuring runtime configuration --------------
+
 
 def init_logger(config,conhandler,filehandler):
     """ Returns the configured console and file logging handlers
