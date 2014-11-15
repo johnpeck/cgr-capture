@@ -28,7 +28,9 @@ module_logger.setLevel(logging.DEBUG)
 from serial.tools.list_ports import comports 
 
 
+# Global variables
 cmdterm = '\r\n' # Terminates each command
+fresolution = 0.09313225746 # Frequency resolution (Hz)
 
 def int8_to_dec(signed):
     """Return a signed decimal number given a signed 8-bit integer
@@ -54,8 +56,7 @@ def get_phasestr(frequency):
     Hz.
 
     """
-    fres = 0.09313225746 # Frequency resolution (Hz)
-    pval = int(frequency/fres)
+    pval = int(frequency/fresolution)
     fthree = int(pval/(2**24))
     ftwo = int((pval%(2**24))/(2**16))
     fone = int((pval%(2**16))/(2**8))

@@ -13,7 +13,8 @@ import argparse
 parser = argparse.ArgumentParser(
    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-r", "--rcfile" , default="cgr-cal.cfg",
-                    help="Runtime configuration file")
+                    help="Runtime configuration file"
+)
 args = parser.parse_args()
 
 

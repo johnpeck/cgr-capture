@@ -16,6 +16,13 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-r", "--rcfile" , default="cgr-gen.cfg",
                     help="Runtime configuration file"
 )
+parser.add_argument("-w", "--waveform", default="sine",
+                    help="Waveform.  Known values are: sine"
+)
+parser.add_argument("-f", "--frequency", default=100,
+                    help="Output frequency"
+)
+
 args = parser.parse_args()
 
 #---------------- Done with configuring argument parsing --------------
@@ -181,6 +188,16 @@ def init_logger(config,conhandler,filehandler):
         conhandler.setLevel(logging.WARNING)
     return (conhandler,filehandler)
 
+def set_sine_freq(handle, setfreq):
+    """ Return the actual frequency set on the hardware
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      setfreq -- The floating point frequency in Hz
+    """
+    actfreq = int(frequency/utils.fresolution) * utils.fresolution
+    return actfreq
+
 # ------------------------- Main procedure ----------------------------
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
@@ -190,13 +207,15 @@ def main():
                  # thus must be made global.
     (ch,fh) = init_logger(config,ch,fh)
     cgr = utils.get_cgr(config)
-    caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
-    eeprom_list = utils.get_eeprom_offlist(cgr)
-    gainlist = utils.set_hw_gain(
-        cgr, [int(config['Inputs']['Aprobe']),
-              int(config['Inputs']['Bprobe'])
-          ]
-    )
+    # caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
+    # eeprom_list = utils.get_eeprom_offlist(cgr)
+    # gainlist = utils.set_hw_gain(
+    #     cgr, [int(config['Inputs']['Aprobe']),
+    #           int(config['Inputs']['Bprobe'])
+    #       ]
+    # )
+    if args.waveform == 'sine':
+        actfreq = set_sine_freq(cgr, args.frequency) # Return the actual frequency
 
    
 

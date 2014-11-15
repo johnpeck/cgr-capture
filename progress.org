@@ -6,6 +6,13 @@
   - You can have weird installation errors if this isn't updated.  As
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
+* cgr-gen script
+** TODO Implement setting the sine wave frequency
+   - Frequency will be set from the command line.  The cgr
+     oscilloscope takes a configuration string consisting of a phase
+     increment for its sine output.  So, if the waveform is set to a
+     sine wave, send that string to set the frequency.  Call the
+     function set_sine_freq(hz).
 * How to increment a revision
 ** Merge with master
    1. git checkout master
@@ -219,7 +226,7 @@
 ** DONE Check to see that averaging works
 * howto
 ** TODO Document procedure for uploading new versions to pypi
-** TODO Document installation with cygwin
+** DONE Document installation with cygwin
 *** Necessary packages:
     1. Gnuplot
     2. Python 2.7
