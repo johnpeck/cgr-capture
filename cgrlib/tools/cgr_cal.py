@@ -141,7 +141,7 @@ def init_config(configFileName):
         ' ']
     config.comments = {}
     config.inline_comments = {}
-    
+
     #------------------------ Connection section ----------------------
     config['Connection'] = {}
     config['Connection'].comments = {}
@@ -331,7 +331,7 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
                 caldict['chA_1x_offset'] = offset_list[0]
                 logger.debug('Channel A file offset set to ' +
                              str(caldict['chA_1x_offset']) + ' counts.')
-                caldict['chA_1x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                caldict['chA_1x_eeprom'] = int(round(caldict['eeprom_scaler'] *
                                                      offset_list[0]))
                 logger.debug('Channel A eeprom offset set to ' +
                              str(caldict['chA_1x_eeprom']) + ' counts.')
@@ -339,16 +339,16 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
                 # The offset exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel A offset of ' + 
+                logger.error('Measured channel A offset of ' +
                              '{:0.2f}'.format(offset_list[0]) +
-                             ' exceeds +/- ' + str(offmax) + 
+                             ' exceeds +/- ' + str(offmax) +
                              ' counts.  Ignoring measurement.')
         elif gainlist[0] == 1: # Channel A set for 10x gain
             if ((offset_list[0] > -offmax) and (offset_list[0] < offmax)):
                 caldict['chA_10x_offset'] = offset_list[0]
                 logger.debug('Channel A file offset set to ' +
                              str(caldict['chA_10x_offset']) + ' counts.')
-                caldict['chA_10x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                caldict['chA_10x_eeprom'] = int(round(caldict['eeprom_scaler'] *
                                                       offset_list[0]))
                 logger.debug('Channel A eeprom offset set to ' +
                              str(caldict['chA_10x_eeprom']) + ' counts.')
@@ -356,16 +356,16 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
                 # The offset exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel A offset of ' + 
+                logger.error('Measured channel A offset of ' +
                              '{:0.2f}'.format(offset_list[0]) +
-                             ' exceeds +/- ' + str(offmax) + 
+                             ' exceeds +/- ' + str(offmax) +
                              ' counts.  Ignoring measurement.')
         if gainlist[1] == 0: # Channel B set for 1x gain
             if ((offset_list[1] > -offmax) and (offset_list[1] < offmax)):
                 caldict['chB_1x_offset'] = offset_list[1]
                 logger.debug('Channel B file offset set to ' +
                              str(caldict['chB_1x_offset']) + ' counts.')
-                caldict['chB_1x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                caldict['chB_1x_eeprom'] = int(round(caldict['eeprom_scaler'] *
                                                      offset_list[1]))
                 logger.debug('Channel B eeprom offset set to ' +
                              str(caldict['chB_1x_eeprom']) + ' counts.')
@@ -373,16 +373,16 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
                 # The offset exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel B offset of ' + 
+                logger.error('Measured channel B offset of ' +
                              '{:0.2f}'.format(offset_list[1]) +
-                             ' exceeds +/- ' + str(offmax) + 
+                             ' exceeds +/- ' + str(offmax) +
                              ' counts.  Ignoring measurement.')
         elif gainlist[1] == 1: # Channel B set for 10x gain
             if ((offset_list[1] > -offmax) and (offset_list[1] < offmax)):
                 caldict['chB_10x_offset'] = offset_list[1]
                 logger.debug('Channel B file offset set to ' +
                              str(caldict['chB_10x_offset']) + ' counts.')
-                caldict['chB_10x_eeprom'] = int(round(caldict['eeprom_scaler'] * 
+                caldict['chB_10x_eeprom'] = int(round(caldict['eeprom_scaler'] *
                                                       offset_list[1]))
                 logger.debug('Channel B eeprom offset set to ' +
                              str(caldict['chB_10x_eeprom']) + ' counts.')
@@ -390,9 +390,9 @@ def get_offsets(handle, ctrl_reg, gainlist, caldict, config):
                 # The offset exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel B offset of ' + 
+                logger.error('Measured channel B offset of ' +
                              '{:0.2f}'.format(offset_list[1]) +
-                             ' exceeds +/- ' + str(offmax) + 
+                             ' exceeds +/- ' + str(offmax) +
                              ' counts.  Ignoring measurement.')
     except KeyboardInterrupt:
         print(' ')
@@ -444,7 +444,7 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
         for channel in range(2):
             slope_list.append(calvolt/(average(offcal_data[channel])))
         if gainlist[0] == 0: # Channel A set for 1x gain
-            if ((slope_list[0] > (0.045 - slopemax)) and 
+            if ((slope_list[0] > (0.045 - slopemax)) and
                 (slope_list[0] < (0.045 + slopemax))):
                 caldict['chA_1x_slope'] = slope_list[0]
                 logger.debug('Channel A 1x slope set to ' +
@@ -455,12 +455,12 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                 # The slope exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel A slope of ' + 
+                logger.error('Measured channel A slope of ' +
                              '{:0.2f}'.format(slope_list[0]) +
-                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) +
                              ' mV of 45 mV per count.  Ignoring measurement.')
         elif gainlist[0] == 1: # Channel A set for 10x gain
-            if ((slope_list[0] > (0.045 - slopemax)) and 
+            if ((slope_list[0] > (0.045 - slopemax)) and
                 (slope_list[0] < (0.045 + slopemax))):
                 caldict['chA_10x_slope'] = slope_list[0]
                 logger.debug('Channel A 10x slope set to ' +
@@ -471,12 +471,12 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                 # The slope exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel A slope of ' + 
+                logger.error('Measured channel A slope of ' +
                              '{:0.2f}'.format(slope_list[0]) +
-                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) +
                              ' mV of 45 mV per count.  Ignoring measurement.')
         if gainlist[1] == 0: # Channel B set for 1x gain
-            if ((slope_list[1] > (0.045 - slopemax)) and 
+            if ((slope_list[1] > (0.045 - slopemax)) and
                 (slope_list[1] < (0.045 + slopemax))):
                 caldict['chB_1x_slope'] = slope_list[1]
                 logger.debug('Channel B 1x slope set to ' +
@@ -487,12 +487,12 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                 # The slope exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel B slope of ' + 
+                logger.error('Measured channel B slope of ' +
                              '{:0.2f}'.format(slope_list[1]) +
-                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) +
                              ' mV of 45 mV per count.  Ignoring measurement.')
         elif gainlist[1] == 1: # Channel B set for 10x gain
-            if ((slope_list[1] > (0.045 - slopemax)) and 
+            if ((slope_list[1] > (0.045 - slopemax)) and
                 (slope_list[1] < (0.045 + slopemax))):
                 caldict['chB_10x_slope'] = slope_list[1]
                 logger.debug('Channel B 10x slope set to ' +
@@ -503,9 +503,9 @@ def get_slopes(handle, ctrl_reg, gainlist, caldict, config):
                 # The slope exceeds the allowed range -- there's
                 # probably something wrong.  Don't write this
                 # calibration value.
-                logger.error('Measured channel B slope of ' + 
+                logger.error('Measured channel B slope of ' +
                              '{:0.2f}'.format(slope_list[1]) +
-                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) + 
+                             ' not within +/- ' + '{:0.0f}'.format(1000 * slopemax) +
                              ' mV of 45 mV per count.  Ignoring measurement.')
     except KeyboardInterrupt:
         print(' ')

@@ -4,7 +4,8 @@ from setuptools import setup
 entry_points = {
     'console_scripts': [
         'cgr-capture = cgrlib.tools.cgr_capture:main',
-        'cgr-cal = cgrlib.tools.cgr_cal:main'
+        'cgr-cal = cgrlib.tools.cgr_cal:main',
+        'cgr-gen = cgrlib.tools.cgr_gen:main'
     ]
 }
 

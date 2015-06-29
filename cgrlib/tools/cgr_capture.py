@@ -180,7 +180,7 @@ def init_config(configFileName):
         'Set the logging level for the logfile.  Levels:',
         'debug, info, warning, error, critical'
         ]
-    
+
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
@@ -242,7 +242,7 @@ def init_config(configFileName):
     config['Inputs'].comments = {}
     config.comments['Inputs'] = [
         ' ',
-        '-------------------- Input configuration ---------------------',  
+        '-------------------- Input configuration ---------------------',
         'The unit is limited to measuring +/-25Vpp at its inputs with',
         'the 1x probe setting, and at the end of a 10x probe with the',
         '10x probe setting.'

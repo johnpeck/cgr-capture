@@ -66,7 +66,38 @@ def get_phasestr(frequency):
               str(fone) + ' ' +
               str(fzero)
     )
-    return(retstr) 
+    return(retstr)
+
+def set_sine_frequency(handle, setfreq):
+    """ Return the actual frequency set on the hardware
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      setfreq -- The floating point frequency in Hz
+    """
+    handle.open()
+    actfreq = int(setfreq / fresolution) * fresolution
+    phase_string = get_phasestr(actfreq)
+    sendcmd(handle,'W F ' + phase_string)
+    handle.close()
+    return actfreq
+
+def set_output_amplitude(handle, amplitude):
+    """ Return the actual output amplitude set on the hardware
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      amplitude -- The requested amplitude in Volts
+    """
+    handle.open()
+    if amplitude > 3:
+        logger.error('Requested amplitude ' + str(amplitude) + ' Vp. Maximum 3Vp')
+        return -1
+    else:
+        azero = int(round(255 * float(amplitude)/3.0))
+        actamp = azero * 3.0/255
+        sendcmd(handle,'W A ' + str(azero))
+        return actamp
     
 
 def write_cal(handle, calfile, caldict):

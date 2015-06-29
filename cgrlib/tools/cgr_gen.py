@@ -22,6 +22,9 @@ parser.add_argument("-w", "--waveform", default="sine",
 parser.add_argument("-f", "--frequency", default=100,
                     help="Output frequency"
 )
+parser.add_argument("-a", "--amplitude", default=0.1,
+                    help="Output amplitude (Vp)"
+)
 
 args = parser.parse_args()
 
@@ -149,7 +152,7 @@ def init_config(configFileName):
         'Set the logging level for the logfile.  Levels:',
         'debug, info, warning, error, critical'
         ]
-    
+
     #----------------------- Calibration section ----------------------
     config['Calibration'] = {}
     config['Calibration'].comments = {}
@@ -188,15 +191,6 @@ def init_logger(config,conhandler,filehandler):
         conhandler.setLevel(logging.WARNING)
     return (conhandler,filehandler)
 
-def set_sine_freq(handle, setfreq):
-    """ Return the actual frequency set on the hardware
-
-    Arguments:
-      handle -- Serial object for the CGR-101
-      setfreq -- The floating point frequency in Hz
-    """
-    actfreq = int(frequency/utils.fresolution) * utils.fresolution
-    return actfreq
 
 # ------------------------- Main procedure ----------------------------
 def main():
@@ -215,9 +209,14 @@ def main():
     #       ]
     # )
     if args.waveform == 'sine':
-        actfreq = set_sine_freq(cgr, args.frequency) # Return the actual frequency
+        actfreq = utils.set_sine_frequency(cgr, float(args.frequency)) # Return the actual frequency
+        logger.debug('Requested ' + '{:0.2f}'.format(float(args.frequency)) + ' Hz, set ' +
+                     '{:0.2f}'.format(actfreq) + ' Hz')
+        actamp = utils.set_output_amplitude(cgr, float(args.amplitude))
+        logger.debug('Requested ' + '{:0.2f}'.format(float(args.amplitude)) + ' Vp, set ' +
+                     '{:0.2f}'.format(actamp) + ' Vp')
 
-   
+
 
 # Execute main() from command line
 if __name__ == '__main__':

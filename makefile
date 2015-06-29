@@ -1,7 +1,8 @@
 # makefile for cgrlib
 
-PYFILES = bin/cgr-cal.py \
-          bin/cgr-capture.py \
+PYFILES = cgrlib/tools/cgr_cal.py \
+          cgrlib/tools/cgr_capture.py \
+          cgrlib/tools/cgr_gen.py \
           setup.py
 
 
