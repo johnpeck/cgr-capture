@@ -8,6 +8,8 @@ import time     # For making pauses
 import os       # For basic file I/O
 import ConfigParser # For reading and writing the configuration file
 import sys # For sys.exit()
+from math import sin # For generating sine waves
+from math import pi
 
 # --------------------- Configure argument parsing --------------------
 import argparse
@@ -164,6 +166,21 @@ def init_config(configFileName):
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
         ]
+    #----------------------- Waveform section -------------------------
+    config['Waveform'] = {}
+    config['Waveform'].comments = {}
+    config.comments['Waveform'] = [
+        ' ',
+        '------------------- Waveform configuration -------------------'
+    ]
+    config['Waveform']['shape'] = 'sine'
+    config['Waveform'].comments['shape'] = [
+        ' ',
+        'Manually set the output waveform shape here.  Shapes set at the'
+        'command line will be given priority.  This configuration will'
+        'be overwritten by the most recent shape.  This saves download'
+        'time when changing frequency or amplitude but not shape.'
+    ]
 
 
 
@@ -208,13 +225,39 @@ def main():
     #           int(config['Inputs']['Bprobe'])
     #       ]
     # )
+    actfreq = utils.set_sine_frequency(cgr, float(args.frequency)) # Return the actual frequency
+    logger.debug('Requested ' + '{:0.2f}'.format(float(args.frequency)) + ' Hz, set ' +
+                 '{:0.2f}'.format(actfreq) + ' Hz')
     if args.waveform == 'sine':
-        actfreq = utils.set_sine_frequency(cgr, float(args.frequency)) # Return the actual frequency
-        logger.debug('Requested ' + '{:0.2f}'.format(float(args.frequency)) + ' Hz, set ' +
-                     '{:0.2f}'.format(actfreq) + ' Hz')
-        actamp = utils.set_output_amplitude(cgr, float(args.amplitude))
-        logger.debug('Requested ' + '{:0.2f}'.format(float(args.amplitude)) + ' Vp, set ' +
-                     '{:0.2f}'.format(actamp) + ' Vp')
+        logger.debug('Configuring sine wave output')
+        if not (config['Waveform']['shape'] == 'sine'):
+            for samplenum in range(256):
+                sampleval = int(round(127 + 127*sin(samplenum * 2*pi/255)))
+                utils.set_arb_value(cgr, samplenum, sampleval)
+            cgr.open()
+            utils.sendcmd(cgr,'W P')
+            cgr.close()   
+            config['Waveform']['shape'] = 'sine'
+            config.write()
+    if args.waveform == 'square':
+        logger.debug('Configuring square wave output')
+        if not (config['Waveform']['shape'] == 'square'):
+            # Set the output to 0 while we load and activate the waveform
+            utils.set_output_amplitude(cgr, 0)
+            for samplenum in range(256):
+                if samplenum < 128:
+                    sampleval = 0
+                else:
+                    sampleval = 255
+                utils.set_arb_value(cgr, samplenum, sampleval)
+            cgr.open()
+            utils.sendcmd(cgr,'W P')
+            cgr.close()
+            config['Waveform']['shape'] = 'square'
+            config.write()
+    actamp = utils.set_output_amplitude(cgr, float(args.amplitude))
+    logger.debug('Requested ' + '{:0.2f}'.format(float(args.amplitude)) + ' Vp, set ' +
+                 '{:0.2f}'.format(actamp) + ' Vp')
 
 
 

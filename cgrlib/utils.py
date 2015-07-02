@@ -82,6 +82,19 @@ def set_sine_frequency(handle, setfreq):
     handle.close()
     return actfreq
 
+def set_arb_value(handle, address, value):
+    """ Set an output value in the arbitrary waveform output buffer
+
+    Arguments:
+      handle -- Serial object for the CGR-101
+      address -- Address of the value (0-255)
+      value -- Value of the arb (0-255)
+    """
+    handle.open()
+    sendcmd(handle,'W S ' + str(address) + ' ' + str(value))
+    handle.close()
+    return
+
 def set_output_amplitude(handle, amplitude):
     """ Return the actual output amplitude set on the hardware
 
@@ -92,11 +105,13 @@ def set_output_amplitude(handle, amplitude):
     handle.open()
     if amplitude > 3:
         logger.error('Requested amplitude ' + str(amplitude) + ' Vp. Maximum 3Vp')
+        handle.close()
         return -1
     else:
         azero = int(round(255 * float(amplitude)/3.0))
         actamp = azero * 3.0/255
         sendcmd(handle,'W A ' + str(azero))
+        handle.close()
         return actamp
     
 
