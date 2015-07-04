@@ -654,7 +654,7 @@ def get_uncal_triggered_data(handle, trigdict):
     handle.open()
     sendcmd(handle,'S G') # Start the capture
     sys.stdout.write('Waiting for ' + 
-                     '{:0.1f}'.format(trigdict['triglev']) +
+                     '{:0.2f}'.format(trigdict['triglev']) +
                      'V trigger at ')
     if trigdict['trigsrc'] == 0:
         print('input A...')

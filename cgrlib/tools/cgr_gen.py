@@ -218,13 +218,6 @@ def main():
                  # thus must be made global.
     (ch,fh) = init_logger(config,ch,fh)
     cgr = utils.get_cgr(config)
-    # caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
-    # eeprom_list = utils.get_eeprom_offlist(cgr)
-    # gainlist = utils.set_hw_gain(
-    #     cgr, [int(config['Inputs']['Aprobe']),
-    #           int(config['Inputs']['Bprobe'])
-    #       ]
-    # )
     actfreq = utils.set_sine_frequency(cgr, float(args.frequency)) # Return the actual frequency
     logger.debug('Requested ' + '{:0.2f}'.format(float(args.frequency)) + ' Hz, set ' +
                  '{:0.2f}'.format(actfreq) + ' Hz')
