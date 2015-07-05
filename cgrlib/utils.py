@@ -104,15 +104,13 @@ def set_output_amplitude(handle, amplitude):
     """
     handle.open()
     if amplitude > 3:
-        logger.error('Requested amplitude ' + str(amplitude) + ' Vp. Maximum 3Vp')
-        handle.close()
-        return -1
-    else:
-        azero = int(round(255 * float(amplitude)/3.0))
-        actamp = azero * 3.0/255
-        sendcmd(handle,'W A ' + str(azero))
-        handle.close()
-        return actamp
+        module_logger.error('Requested amplitude ' + str(amplitude) + ' Vp. Maximum 3Vp')
+        amplitude = 3
+    azero = int(round(255 * float(amplitude)/3.0))
+    actamp = azero * 3.0/255
+    sendcmd(handle,'W A ' + str(azero))
+    handle.close()
+    return actamp
     
 
 def write_cal(handle, calfile, caldict):
@@ -263,16 +261,10 @@ def get_cgr(config):
     # 3. Sort of hardware ID -- may contain VID:PID of USB-serial adapters.
     portset = set(comports()) # Use set to prevent repeats
     # Add undetectable serial ports here
-    portset.add(('/dev/ttyS0', 'ttyS0', 'n/a'))
-    portset.add(('/dev/ttyS1', 'ttyS1', 'n/a'))
-    portset.add(('/dev/ttyS2', 'ttyS2', 'n/a'))
-    portset.add(('/dev/ttyS3', 'ttyS3', 'n/a'))
-    portset.add(('/dev/ttyS4', 'ttyS4', 'n/a'))
-    portset.add(('/dev/ttyS5', 'ttyS5', 'n/a'))
-    portset.add(('/dev/ttyS6', 'ttyS6', 'n/a'))
-    portset.add(('/dev/ttyS7', 'ttyS7', 'n/a'))
-    portset.add(('/dev/ttyS8', 'ttyS8', 'n/a'))
-    portset.add(('/dev/ttyS9', 'ttyS9', 'n/a'))
+    for portnum in range(10):
+        portset.add(('/dev/ttyUSB' + str(portnum),
+                     'ttyUSB' + str(portnum), 'n/a')
+        )
     
     # Add the port specified in the configuration to the front of the
     # list.  We have to convert the set object to a list because set

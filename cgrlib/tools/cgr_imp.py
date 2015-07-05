@@ -178,6 +178,17 @@ def init_config(configFileName):
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
         ]
+    config['Calibration']['slope'] = 1
+    config['Calibration'].comments['slope'] = [
+        ' ',
+        'Fractional impedance error.  Measure this by:',
+        '1. Remove the load from the output -- output should be open.',
+        '2. Set both the slope and resistor values to 1 in this file.',
+        '3. Connect both channels A and B to the output',
+        '4. Run an impedance sweep.',
+        '5. Calculate: slope = 1 / (1 + Rr), where Rr is the residual',
+        '   resistance -- the resistance measured in the last step.'
+    ]
 
     #--------------------- Frequency sweep section --------------------
     config['Sweep'] = {}
@@ -194,7 +205,7 @@ def init_config(configFileName):
     config['Sweep'].comments['stop'] = [
         'Last frequency in the sweep (Hz)'
     ]
-    config['Sweep']['points'] = 10
+    config['Sweep']['points'] = 1
     config['Sweep'].comments['points'] = [
         'Number of points in the sweep'
     ]
@@ -202,7 +213,7 @@ def init_config(configFileName):
     config['Sweep'].comments['cycles'] = [
         'Number of sine wave cycles to acquire for each frequency step'
     ]
-    config['Sweep']['amplitude'] = 0.1
+    config['Sweep']['amplitude'] = 1
     config['Sweep'].comments['amplitude'] = [
         'Amplitude of the driving frequency (Volts peak)'
     ]
@@ -214,7 +225,7 @@ def init_config(configFileName):
         ' ',
         '------------- Impedance calculation configuration ------------'
     ]
-    config['Impedance']['resistor'] = 100
+    config['Impedance']['resistor'] = 1
     config['Impedance'].comments['resistor'] = [
         'Reference resistor -- current is voltage divided by this value'
     ]
@@ -336,45 +347,31 @@ def get_sine_vectors(frequency,timedata,voltdata):
         )        
     return [amplitudes, phases]
 
-
-def get_z_vector(frequency, timedata, voltdata, resistor):
+def get_z_vector(config, frequency, timedata, voltdata):
     """Returns the magnitude and phase of the measured impedance
 
     Arguments:
+      config -- The configuration file object
       frequency -- The frequency to lock in on
       timedata -- List of sample times
       voltdata -- 1024 x 2 list of voltage samples
-      resistor -- Reference resistor value (ohms)
     """
+    resistor = float(config['Impedance']['resistor'])
     [amplitudes, phases] = get_sine_vectors(frequency, timedata, voltdata)
-    ratio_mag = amplitudes[0]/amplitudes[1]
+    ratio_mag = amplitudes[0]/amplitudes[1] * (float(config['Calibration']['slope']))
     ratio_phi = phases[0] - phases[1]
-    impedance = [resistor * (ratio_mag + 1),ratio_phi]
+    ratio_real = ratio_mag * cos(ratio_phi)
+    ratio_imag = ratio_mag * sin(ratio_phi)
+    impedance_real = resistor * (ratio_real -1)
+    impedance_imag = resistor * (ratio_imag)
+    impedance = [sqrt(impedance_real**2 + impedance_imag**2),
+                 arctan2(impedance_imag,impedance_real)
+    ]
     return impedance
 
-def sinediff(phaseshift, frequency, timedata, voltdata):
-    """Returns the difference between calculated sine and input data
-
-    Arguments:
-      phaseshift -- Offset to apply to the calculated sine (radians)
-      frequency -- Frequency for the calculated sine (Hz)
-      timedata -- List of sample times
-      voltdata -- List of voltages at sample times
-    """
-    offset_volts = mean(voltdata)
-    refdata = []
-    for time in timedata:
-        refdata.append(sin(2*pi*frequency*time + phaseshift))
-    diff = 0
-    for data, ref in zip(voltdata, refdata):
-        diff += ((data - offset_volts) - ref)**2
-    return diff
-        
-    
-        
-    
 def wave_plot_init():
-    """ Returns the configured gnuplot plot object for raw waveforms.
+    """Returns the configured gnuplot plot object for raw waveforms.
+
     """
     # Set debug=1 to see gnuplot commands during execution.
     plotobj = Gnuplot.Gnuplot(debug=0)
@@ -383,6 +380,23 @@ def wave_plot_init():
     plotobj('set key bottom left')
     plotobj.xlabel('Time (s)')
     plotobj.ylabel('Voltage (V)')
+    plotobj("set autoscale y")
+    plotobj("set format x '%0.0s %c'")
+    plotobj('set pointsize 1')
+    return plotobj
+
+def magnitude_plot_init():
+    """Returns the configured gnuplot plot object for the impedance
+    magnitude.
+
+    """
+    # Set debug=1 to see gnuplot commands during execution.
+    plotobj = Gnuplot.Gnuplot(debug=0)
+    plotobj('set terminal x11') # Send a gnuplot command
+    plotobj('set style data lines')
+    plotobj('set key bottom left')
+    plotobj.xlabel('Frequency (Hz)')
+    plotobj.ylabel('|Impedance| (Ohms)')
     plotobj("set autoscale y")
     plotobj("set format x '%0.0s %c'")
     plotobj('set pointsize 1')
@@ -437,6 +451,24 @@ def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, amplitudes,
     plotobj('set terminal x11')
 
 
+def plot_magnitude_data(plotobj, frequencies, magnitudes):
+    """Plot impedance magnitude data.
+
+    Arguments:
+      plotobj -- The gnuplot plot object
+      frequencies -- List of drive frequencies
+      magnitudes -- List of impedance magnitudes at the drive frequencies
+
+    """
+    plotitem_zmag = Gnuplot.PlotItems.Data(
+        frequencies,magnitudes,title='Impedance magnitude')
+    plotobj.plot(plotitem_zmag)
+    savefilename = ('zmag.eps')
+    plotobj('set terminal postscript eps color')
+    plotobj("set output '" + savefilename + "'")
+    plotobj('replot')
+    plotobj('set terminal x11')
+
 # ------------------------- Main procedure ----------------------------
 def main():
     logger.debug('Utility module number is ' + str(utils.utilnum))
@@ -450,19 +482,27 @@ def main():
     eeprom_list = utils.get_eeprom_offlist(cgr)
     # Configure the trigger:
     #   Trigger on channel A
-    #   Trigger at 0.05 V
+    #   Trigger at 1/100 the drive amplitude
     #   Trigger on the rising edge
     #   Capture 512 points after trigger
-    trigdict = utils.get_trig_dict(0,0.05,0,512)
+    trigdict = utils.get_trig_dict(0,
+                                   float(config['Sweep']['amplitude'])/100,
+                                   0,
+                                   512
+    )
     # Configure the inputs for 1x gain (no probe)
     gainlist = utils.set_hw_gain(cgr,[0,0])
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
     waveplot = wave_plot_init()
+    magplot = magnitude_plot_init()
     freqlist = get_sweep_list(config)
+    drive_frequency_list = []
+    impedance_magnitude_list = []
     for progfreq in freqlist:
         # The actual frequency will be determined by the hardware
         actfreq = utils.set_sine_frequency(cgr, float(progfreq))
+        drive_frequency_list.append(actfreq)
         logger.debug('Requested ' + '{:0.2f}'.format(float(progfreq)) +
                      ' Hz, set ' + '{:0.2f}'.format(actfreq) + ' Hz')
         if (progfreq == freqlist[0]):
@@ -495,9 +535,6 @@ def main():
                 caldict,gainlist,[avgdata[0],avgdata[1]]
             )
             timedata = utils.get_timelist(actrate)
-        
-
-        
         [amplitudes, phases] = get_sine_vectors(actfreq, timedata, voltdata)
         logger.debug('Channel A amplitude is ' + '{:0.3f}'.format(amplitudes[0]) +
                      ' Vp'
@@ -511,24 +548,18 @@ def main():
         logger.debug('Channel B phase shift is ' + '{:0.3f}'.format(phases[1] * 180/pi) +
                      ' degrees'
         )      
-        logger.debug('Channel A lockin amplitude is ' + '{:0.3f}'.format(amplitudes[0]) +
-                     ' Vp'
-        )
-        logger.debug('Channel B lockin amplitude is ' + '{:0.3f}'.format(amplitudes[1]) +
-                     ' Vp'
-        )
         plot_wave_data(waveplot, timedata, voltdata, trigdict, actfreq, amplitudes, phases)
-        [zmag,zphase] = get_z_vector(actfreq, timedata, voltdata,
-                                     float(config['Impedance']['resistor'])
-        )
+        [zmag,zphase] = get_z_vector(config, actfreq, timedata, voltdata)
         logger.debug('Impedance magnitude is ' + '{:0.3f}'.format(zmag) +
                      ' Ohms'
         )
         logger.debug('Impedance angle is ' + '{:0.3f}'.format(zphase * 180/pi) +
                      ' degrees'
         )
+        impedance_magnitude_list.append(zmag)
+        plot_magnitude_data(magplot, drive_frequency_list, impedance_magnitude_list)
     # Set amplitude to zero to end the sweep
-    utils.set_output_amplitude(cgr, 0)
+    utils.set_output_amplitude(cgr, 0.01)
     raw_input('Press any key to close plot and exit...')
 
 

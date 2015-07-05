@@ -5,7 +5,8 @@ entry_points = {
     'console_scripts': [
         'cgr-capture = cgrlib.tools.cgr_capture:main',
         'cgr-cal = cgrlib.tools.cgr_cal:main',
-        'cgr-gen = cgrlib.tools.cgr_gen:main'
+        'cgr-gen = cgrlib.tools.cgr_gen:main',
+        'cgr-imp = cgrlib.tools.cgr_imp:main'
     ]
 }
 
