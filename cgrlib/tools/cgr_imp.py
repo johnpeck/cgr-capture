@@ -178,16 +178,10 @@ def init_config(configFileName):
     config['Calibration'].comments['calfile'] = [
         "The calibration file in Python's pickle format"
         ]
-    config['Calibration']['slope'] = 1
-    config['Calibration'].comments['slope'] = [
+    config['Calibration']['Rshort'] = 0
+    config['Calibration'].comments['Rshort'] = [
         ' ',
-        'Fractional impedance error.  Measure this by:',
-        '1. Remove the load from the output -- output should be open.',
-        '2. Set both the slope and resistor values to 1 in this file.',
-        '3. Connect both channels A and B to the output',
-        '4. Run an impedance sweep.',
-        '5. Calculate: slope = 1 / (1 + Rr), where Rr is the residual',
-        '   resistance -- the resistance measured in the last step.'
+        'Resistance measured with inputs A and B connected to the output (ohms)'
     ]
 
     #--------------------- Frequency sweep section --------------------
@@ -330,9 +324,11 @@ def get_sine_vectors(frequency,timedata,voltdata):
         refcos.append(cos(2*pi*frequency*time))
     sineprod = []
     cosprod = []
+    vectors = [] # [real part, imaginary part]
     for channelnum in range(2):
         sineprod.append(multiply(voltdata[channelnum]-offsets[channelnum],refsin))
         cosprod.append(multiply(voltdata[channelnum]-offsets[channelnum],refcos))
+        vectors.append([mean(sineprod[channelnum]),mean(cosprod[channelnum])])
     inphase_amplitudes = [mean(sineprod[0]), mean(sineprod[1])]
     quadrature_amplitudes = [mean(cosprod[0]), mean(cosprod[1])]
     amplitudes = []
@@ -345,7 +341,26 @@ def get_sine_vectors(frequency,timedata,voltdata):
         phases.append(arctan2(quadrature_amplitudes[channelnum],
                               inphase_amplitudes[channelnum])
         )        
-    return [amplitudes, phases]
+    # return [amplitudes, phases]
+    return vectors
+
+def vector_length(vector):
+    """Returns the length of the input vector
+
+    Arguments:
+      vector -- [real part, imaginary part] two-member list
+    """
+    length = sqrt(vector[0]**2 + vector[1]**2)
+    return length
+
+def vector_angle(vector):
+    """Returns the angle of the input vector in radians
+
+    Arguments:
+      vector -- [real part, imaginary part] two-member list
+    """
+    angle = arctan2(vector[1],vector[0])
+    return angle
 
 def get_z_vector(config, frequency, timedata, voltdata):
     """Returns the magnitude and phase of the measured impedance
@@ -357,16 +372,14 @@ def get_z_vector(config, frequency, timedata, voltdata):
       voltdata -- 1024 x 2 list of voltage samples
     """
     resistor = float(config['Impedance']['resistor'])
-    [amplitudes, phases] = get_sine_vectors(frequency, timedata, voltdata)
-    ratio_mag = amplitudes[0]/amplitudes[1] * (float(config['Calibration']['slope']))
-    ratio_phi = phases[0] - phases[1]
+    vectors = get_sine_vectors(frequency, timedata, voltdata)
+    ratio_mag = vector_length(vectors[0])/vector_length(vectors[1])
+    ratio_phi = vector_angle(vectors[0]) - vector_angle(vectors[1])
     ratio_real = ratio_mag * cos(ratio_phi)
     ratio_imag = ratio_mag * sin(ratio_phi)
-    impedance_real = resistor * (ratio_real -1)
-    impedance_imag = resistor * (ratio_imag)
-    impedance = [sqrt(impedance_real**2 + impedance_imag**2),
-                 arctan2(impedance_imag,impedance_real)
-    ]
+    impedance_uncal = [resistor * (ratio_real - 1),resistor * (ratio_imag)]
+    impedance = [impedance_uncal[0] - float(config['Calibration']['Rshort']),
+                 impedance_uncal[1]]
     return impedance
 
 def wave_plot_init():
@@ -396,13 +409,29 @@ def magnitude_plot_init():
     plotobj('set style data lines')
     plotobj('set key bottom left')
     plotobj.xlabel('Frequency (Hz)')
-    plotobj.ylabel('|Impedance| (Ohms)')
+    plotobj.ylabel('|Z| (Ohms)')
     plotobj("set autoscale y")
     plotobj("set format x '%0.0s %c'")
     plotobj('set pointsize 1')
     return plotobj
 
-def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, amplitudes, phases):
+def real_plot_init():
+    """Returns the configured gnuplot plot object for Real(impedance)
+    """
+    # Set debug=1 to see gnuplot commands during execution.
+    plotobj = Gnuplot.Gnuplot(debug=0)
+    plotobj('set terminal x11') # Send a gnuplot command
+    plotobj('set style data lines')
+    plotobj('set key bottom left')
+    plotobj.xlabel('Frequency (Hz)')
+    plotobj.ylabel('Real(Z) (Ohms)')
+    plotobj("set autoscale y")
+    plotobj("set format x '%0.0s %c'")
+    plotobj('set pointsize 1')
+    return plotobj
+
+
+def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, sine_vectors):
     """Plot data from both channels along with the fit result.
 
     Arguments:
@@ -411,17 +440,16 @@ def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, amplitudes,
       voltdata -- 1024 x 2 list of voltage samples
       trigdict -- Trigger parameter dictionary
       frequency -- The frequency of the synthesized fit
-      amplitudes -- The measured amplitudes
-      phases -- The measured phase shifts
+      sine_vectors -- List of [real part, imaginary part] vectors
     """
     fitdata = [[],[]]
     for time in timedata:
-        fitdata[0].append(amplitudes[0]*sin(2*pi*frequency*time +phases[0]) +
-                          mean(voltdata[0])
-        )
-        fitdata[1].append(amplitudes[1]*sin(2*pi*frequency*time + phases[1]) +
-                          mean(voltdata[1])
-        )
+        for channelnum in range(2):
+            fitdata[channelnum].append(
+                2 * vector_length(sine_vectors[channelnum]) *
+                sin(2*pi*frequency*time + vector_angle(sine_vectors[channelnum])) +
+                mean(voltdata[channelnum])
+            )
     plotitem_cha_raw = Gnuplot.PlotItems.Data(
         timedata,voltdata[0],title='Channel A raw')
     plotitem_chb_raw = Gnuplot.PlotItems.Data(
@@ -451,15 +479,18 @@ def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, amplitudes,
     plotobj('set terminal x11')
 
 
-def plot_magnitude_data(plotobj, frequencies, magnitudes):
+def plot_magnitude_data(plotobj, frequencies, impedances):
     """Plot impedance magnitude data.
 
     Arguments:
       plotobj -- The gnuplot plot object
       frequencies -- List of drive frequencies
-      magnitudes -- List of impedance magnitudes at the drive frequencies
+      impedances -- List of [real, imaginary] impedances at the drive frequencies
 
     """
+    magnitudes = []
+    for z in impedances:
+        magnitudes.append(vector_length(z))
     plotitem_zmag = Gnuplot.PlotItems.Data(
         frequencies,magnitudes,title='Impedance magnitude')
     plotobj.plot(plotitem_zmag)
@@ -468,6 +499,28 @@ def plot_magnitude_data(plotobj, frequencies, magnitudes):
     plotobj("set output '" + savefilename + "'")
     plotobj('replot')
     plotobj('set terminal x11')
+
+def plot_real_data(plotobj, frequencies, impedances):
+    """Plot Real(Z) data
+
+    Arguments:
+      plotobj -- The gnuplot plot object
+      frequencies -- List of drive frequencies
+      impedances -- List of [real, imaginary] impedances at the drive frequencies
+
+    """
+    resistances = []
+    for z in impedances:
+        resistances.append(z[0])
+    plotitem_zreal = Gnuplot.PlotItems.Data(
+        frequencies,resistances,title='Resistance')
+    plotobj.plot(plotitem_zreal)
+    savefilename = ('zreal.eps')
+    plotobj('set terminal postscript eps color')
+    plotobj("set output '" + savefilename + "'")
+    plotobj('replot')
+    plotobj('set terminal x11')
+
 
 # ------------------------- Main procedure ----------------------------
 def main():
@@ -496,9 +549,10 @@ def main():
     utils.set_trig_samples(cgr,trigdict)
     waveplot = wave_plot_init()
     magplot = magnitude_plot_init()
+    realplot = real_plot_init()
     freqlist = get_sweep_list(config)
     drive_frequency_list = []
-    impedance_magnitude_list = []
+    impedance_list = []
     for progfreq in freqlist:
         # The actual frequency will be determined by the hardware
         actfreq = utils.set_sine_frequency(cgr, float(progfreq))
@@ -535,29 +589,36 @@ def main():
                 caldict,gainlist,[avgdata[0],avgdata[1]]
             )
             timedata = utils.get_timelist(actrate)
-        [amplitudes, phases] = get_sine_vectors(actfreq, timedata, voltdata)
-        logger.debug('Channel A amplitude is ' + '{:0.3f}'.format(amplitudes[0]) +
+        sine_vectors = get_sine_vectors(actfreq, timedata, voltdata)
+        logger.debug('Channel A amplitude is ' +
+                     '{:0.3f}'.format(2*vector_length(sine_vectors[0])) +
                      ' Vp'
         )
-        logger.debug('Channel B amplitude is ' + '{:0.3f}'.format(amplitudes[1]) +
+        logger.debug('Channel B amplitude is ' +
+                     '{:0.3f}'.format(2*vector_length(sine_vectors[1])) +
                      ' Vp'
         )     
-        logger.debug('Channel A phase shift is ' + '{:0.3f}'.format(phases[0] * 180/pi) +
+        logger.debug('Channel A phase shift is ' +
+                     '{:0.3f}'.format(vector_angle(sine_vectors[0]) * 180/pi) +
                      ' degrees'
         )
-        logger.debug('Channel B phase shift is ' + '{:0.3f}'.format(phases[1] * 180/pi) +
+        logger.debug('Channel B phase shift is ' +
+                     '{:0.3f}'.format(vector_angle(sine_vectors[1]) * 180/pi) +
                      ' degrees'
-        )      
-        plot_wave_data(waveplot, timedata, voltdata, trigdict, actfreq, amplitudes, phases)
-        [zmag,zphase] = get_z_vector(config, actfreq, timedata, voltdata)
-        logger.debug('Impedance magnitude is ' + '{:0.3f}'.format(zmag) +
+        )
+        plot_wave_data(waveplot, timedata, voltdata, trigdict, actfreq, sine_vectors)        
+        impedance = get_z_vector(config, actfreq, timedata, voltdata)
+        logger.debug('Impedance magnitude is ' +
+                     '{:0.3f}'.format(vector_length(impedance)) +
                      ' Ohms'
         )
-        logger.debug('Impedance angle is ' + '{:0.3f}'.format(zphase * 180/pi) +
+        logger.debug('Impedance angle is ' +
+                     '{:0.3f}'.format(vector_angle(impedance) * 180/pi) +
                      ' degrees'
         )
-        impedance_magnitude_list.append(zmag)
-        plot_magnitude_data(magplot, drive_frequency_list, impedance_magnitude_list)
+        impedance_list.append(impedance)
+        plot_magnitude_data(magplot, drive_frequency_list, impedance_list)
+        plot_real_data(realplot, drive_frequency_list, impedance_list)
     # Set amplitude to zero to end the sweep
     utils.set_output_amplitude(cgr, 0.01)
     raw_input('Press any key to close plot and exit...')
