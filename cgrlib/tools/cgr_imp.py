@@ -184,6 +184,25 @@ def init_config(configFileName):
         'Resistance measured with inputs A and B connected to the output (ohms)'
     ]
 
+    #------------------------ Input section ---------------------------
+    config['Inputs'] = {}
+    config['Inputs'].comments = {}
+    config.comments['Inputs'] = [
+        ' ',
+        '------------------- Input configuration ----------------------'
+    ]
+    config['Inputs']['gain'] = 1
+    config['Inputs'].comments['gain'] = [
+        'Input hardware gain.  Remember to run cgr-cal with the correct',
+        'gain settings to calibrate slope and offset',
+        ' ',
+        'Gain setting                Maximum voltage (V)',
+        '--------------------------------------------------------------',
+        '    1                             25                          ',
+        '    10                            2.5                         '
+    ]
+        
+        
     #--------------------- Frequency sweep section --------------------
     config['Sweep'] = {}
     config['Sweep'].comments = {}
@@ -584,8 +603,11 @@ def main():
                                    0,
                                    512
     )
-    # Configure the inputs for 1x gain (no probe)
-    gainlist = utils.set_hw_gain(cgr,[0,0])
+    # Configure the inputs for 10x gain
+    if (int(config['Inputs']['gain']) == 10):
+        gainlist = utils.set_hw_gain(cgr,[1,1])
+    else:
+        gainlist = utils.set_hw_gain(cgr,[0,0])
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
     waveplot = wave_plot_init()
@@ -630,6 +652,9 @@ def main():
             voltdata = utils.get_cal_data(
                 caldict,gainlist,[avgdata[0],avgdata[1]]
             )
+            if (int(config['Inputs']['gain']) == 10):
+                # Divide by 10 for 10x hardware gain with no probe
+                voltdata = divide(voltdata,10)
             timedata = utils.get_timelist(actrate)
         sine_vectors = get_sine_vectors(actfreq, timedata, voltdata)
         logger.debug('Channel A amplitude is ' +
@@ -659,9 +684,10 @@ def main():
                      ' degrees'
         )
         impedance_list.append(impedance)
-        plot_magnitude_data(magplot, drive_frequency_list, impedance_list)
-        plot_real_data(realplot, drive_frequency_list, impedance_list)
-        plot_capacitance_data(capplot, drive_frequency_list, impedance_list)
+        if (len(drive_frequency_list) > 1):
+            plot_magnitude_data(magplot, drive_frequency_list, impedance_list)
+            plot_real_data(realplot, drive_frequency_list, impedance_list)
+            plot_capacitance_data(capplot, drive_frequency_list, impedance_list)
     # Set amplitude to zero to end the sweep
     utils.set_output_amplitude(cgr, 0.01)
     raw_input('Press any key to close plot and exit...')
