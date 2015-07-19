@@ -207,6 +207,10 @@ def init_config(configFileName):
     config['Sweep'].comments['cycles'] = [
         'Number of sine wave cycles to acquire for each frequency step'
     ]
+    config['Sweep']['averages'] = 1
+    config['Sweep'].comments['averages'] = [
+        'Number of acquisitions to average at each frequency step'
+    ]
     config['Sweep']['amplitude'] = 1
     config['Sweep'].comments['amplitude'] = [
         'Amplitude of the driving frequency (Volts peak)'
@@ -431,6 +435,22 @@ def real_plot_init():
     return plotobj
 
 
+def capacitance_plot_init():
+    """Returns the configured gnuplot plot object for capacitance
+    """
+    # Set debug=1 to see gnuplot commands during execution.
+    plotobj = Gnuplot.Gnuplot(debug=0)
+    plotobj('set terminal x11') # Send a gnuplot command
+    plotobj('set style data lines')
+    plotobj('set key bottom left')
+    plotobj.xlabel('Frequency (Hz)')
+    plotobj.ylabel('Capacitance (F)')
+    plotobj("set autoscale y")
+    plotobj("set format x '%0.0s %c'")
+    plotobj("set format y '%0.1s %c'")
+    plotobj('set pointsize 1')
+    return plotobj
+
 def plot_wave_data(plotobj, timedata, voltdata, trigdict, frequency, sine_vectors):
     """Plot data from both channels along with the fit result.
 
@@ -521,6 +541,27 @@ def plot_real_data(plotobj, frequencies, impedances):
     plotobj('replot')
     plotobj('set terminal x11')
 
+def plot_capacitance_data(plotobj, frequencies, impedances):
+    """Plot capacitances calculated from impedances
+
+    Arguments:
+      plotobj -- The gnuplot plot object
+      frequencies -- List of drive frequencies
+      impedances -- List of [real, imaginary] impedances at the drive frequencies
+   
+    """
+    capacitances = []
+    for frequency, impedance in zip(frequencies, impedances):
+        capacitances.append(-1/(2 * pi * frequency * impedance[1]))
+    plotitem_zcap = Gnuplot.PlotItems.Data(
+        frequencies, capacitances, title='Capacitance')
+    plotobj.plot(plotitem_zcap)
+    savefilename = ('zcap.eps')
+    plotobj('set terminal postscript eps color')
+    plotobj("set output '" + savefilename + "'")
+    plotobj('replot')
+    plotobj('set terminal x11')
+
 
 # ------------------------- Main procedure ----------------------------
 def main():
@@ -550,6 +591,7 @@ def main():
     waveplot = wave_plot_init()
     magplot = magnitude_plot_init()
     realplot = real_plot_init()
+    capplot = capacitance_plot_init()
     freqlist = get_sweep_list(config)
     drive_frequency_list = []
     impedance_list = []
@@ -569,7 +611,7 @@ def main():
                      ' Hz, for an acquisition time of ' + '{:0.2f}'.format(1024/actrate * 1000) +
                      ' milliseconds'
                      )
-        for capturenum in range(1):
+        for capturenum in range(int(config['Sweep']['averages'])):
             if trigdict['trigsrc'] == 3:
                 # Internal trigger
                 tracedata = utils.get_uncal_forced_data(cgr,ctrl_reg)
@@ -577,7 +619,7 @@ def main():
                 # Trigger on a voltage present at some input
                 tracedata = utils.get_uncal_triggered_data(cgr,trigdict)
             logger.info('Acquiring trace ' + str(capturenum + 1) + ' of ' +
-                        str(0)
+                        str(int(config['Sweep']['averages']))     
             )
             if capturenum == 0:
                 sumdata = tracedata
@@ -619,6 +661,7 @@ def main():
         impedance_list.append(impedance)
         plot_magnitude_data(magplot, drive_frequency_list, impedance_list)
         plot_real_data(realplot, drive_frequency_list, impedance_list)
+        plot_capacitance_data(capplot, drive_frequency_list, impedance_list)
     # Set amplitude to zero to end the sweep
     utils.set_output_amplitude(cgr, 0.01)
     raw_input('Press any key to close plot and exit...')

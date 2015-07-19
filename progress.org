@@ -6,6 +6,12 @@
   - You can have weird installation errors if this isn't updated.  As
     usual, use pip install --upgrade setuptools to get it up to date.
 * ----------------------------- TODO list ------------------------------
+* cgr-imp script
+** TODO Implement open calibration
+   - The open calibration is done by leaving the reference resistor
+     connected, but disconnecting the zut.  One channel (1) should be
+     connected to the source, and the second (2) should be connected to
+     the reference resistor.
 * cgr-gen script
 ** TODO Implement setting the sine wave frequency
    - Frequency will be set from the command line.  The cgr
