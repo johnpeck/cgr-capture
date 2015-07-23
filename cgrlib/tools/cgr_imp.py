@@ -281,13 +281,7 @@ def get_sweep_list(config):
     points = int(config['Sweep']['points'])
     startfreq = float(config['Sweep']['start'])
     stopfreq = float(config['Sweep']['stop'])
-    for freqnum in range(points):
-        if freqnum == 0:
-            freqlist.append(startfreq)
-        else:
-            freqlist.append(startfreq +
-                            freqnum * (stopfreq - startfreq)/(points-1)
-            )
+    freqlist = logspace(log10(startfreq),log10(stopfreq),points,True)
     return freqlist
         
 def set_sample_rate(handle, config, drive_frequency, trigger_dictionary):
@@ -405,6 +399,24 @@ def get_z_vector(config, frequency, timedata, voltdata):
                  impedance_uncal[1]]
     return impedance
 
+def get_input_means(handle, gainlist, caldict):
+    """Returns the mean voltages [chA mean, chB mean]
+    
+    Arguments:
+      handle -- Serial object for the CGR-101
+      gainlist -- Gain configuration
+      caldict -- A dictionary of (calibration factor names) : values
+    """
+    offsets = []
+    trigdict = utils.get_trig_dict(3,0,0,512)
+    [ctrl_reg, fsamp_act] = utils.set_ctrl_reg(handle, 1e5, trigdict)
+    tracedata = utils.get_uncal_forced_data(handle,ctrl_reg)
+    voltdata = utils.get_cal_data(caldict,gainlist,tracedata)
+    offsets.append(mean(voltdata[0]))
+    offsets.append(mean(voltdata[1]))
+    return(offsets)
+    
+
 def wave_plot_init():
     """Returns the configured gnuplot plot object for raw waveforms.
 
@@ -434,6 +446,7 @@ def magnitude_plot_init():
     plotobj.xlabel('Frequency (Hz)')
     plotobj.ylabel('|Z| (Ohms)')
     plotobj("set autoscale y")
+    plotobj('set logscale x')
     plotobj("set format x '%0.0s %c'")
     plotobj('set pointsize 1')
     return plotobj
@@ -593,21 +606,24 @@ def main():
     cgr = utils.get_cgr(config)
     caldict = utils.load_cal(cgr, config['Calibration']['calfile'])
     eeprom_list = utils.get_eeprom_offlist(cgr)
-    # Configure the trigger:
-    #   Trigger on channel A
-    #   Trigger at 1/100 the drive amplitude
-    #   Trigger on the rising edge
-    #   Capture 512 points after trigger
-    trigdict = utils.get_trig_dict(0,
-                                   float(config['Sweep']['amplitude'])/100,
-                                   0,
-                                   512
-    )
     # Configure the inputs for 10x gain
     if (int(config['Inputs']['gain']) == 10):
         gainlist = utils.set_hw_gain(cgr,[1,1])
     else:
         gainlist = utils.set_hw_gain(cgr,[0,0])
+    meanvolts = get_input_means(cgr, gainlist, caldict)
+    logger.debug('Channel A mean is ' + '{:0.3f}'.format(meanvolts[0]) + ' V')
+    logger.debug('Channel B mean is ' + '{:0.3f}'.format(meanvolts[1]) + ' V')
+    # Configure the trigger:
+    #   Trigger on channel A
+    #   Trigger at channel A's mean voltage
+    #   Trigger on the rising edge
+    #   Capture 512 points after trigger
+    trigdict = utils.get_trig_dict(0,
+                                   meanvolts[0],
+                                   0,
+                                   512
+    )
     utils.set_trig_level(cgr, caldict, gainlist, trigdict)
     utils.set_trig_samples(cgr,trigdict)
     waveplot = wave_plot_init()
@@ -649,9 +665,7 @@ def main():
                 sumdata = add(sumdata,tracedata)
             avgdata = divide(sumdata,float(capturenum +1))
             # Apply calibration
-            voltdata = utils.get_cal_data(
-                caldict,gainlist,[avgdata[0],avgdata[1]]
-            )
+            voltdata = utils.get_cal_data(caldict,gainlist,avgdata)
             if (int(config['Inputs']['gain']) == 10):
                 # Divide by 10 for 10x hardware gain with no probe
                 voltdata = divide(voltdata,10)
